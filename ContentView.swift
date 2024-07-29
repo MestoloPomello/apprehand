@@ -61,7 +61,7 @@ struct CustomButton_Impara: View {
     var body: some View {
         NavigationLink(destination: LevelSelectionView(viewContext: "impara")) {
             VStack {
-                Image("Impara")
+                Image("bench-barbel")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
