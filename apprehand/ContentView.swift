@@ -7,7 +7,7 @@ struct Menu_View: View {
         NavigationView {
             ZStack {
                 // Immagine di sfondo
-                Image("Sfondo home")
+                Image("background")
                     .resizable() // Rende l'immagine ridimensionabile
                     .scaledToFill() // Rende l'immagine adatta a riempire l'intera area
                     .ignoresSafeArea() // Fa sì che l'immagine riempia anche le aree sicure (come notch, bordi ecc.)
@@ -16,8 +16,8 @@ struct Menu_View: View {
                 VStack(spacing: 20) {
                     // Prima riga di pulsanti
                     HStack(spacing: 20) {
-                        CustomButton_Impara(imageName: "book.fill", title: "Impara", gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)])
-                        CustomButton_Allenati(imageName: "dumbbell.fill", title: "Allenati", gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] )
+                        CustomButton_Impara(imageName: "icons/book", title: "Impara", gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)])
+                        CustomButton_Allenati(imageName: "icons/bench-barbel", title: "Allenati", gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] )
                     }
                     // Seconda riga di pulsanti
                     CustomButton_Lingua(imageName: "globe", title: "Lingua", gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
@@ -61,7 +61,7 @@ struct CustomButton_Impara: View {
     var body: some View {
         NavigationLink(destination: LevelSelectionView(viewContext: "impara")) {
             VStack {
-                Image("bench-barbel")
+                Image("icons/bench-barbel")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
@@ -92,10 +92,10 @@ struct CustomButton_Impara: View {
 struct LanguageMenu: View {
     var body: some View {
         VStack(spacing: 20) {
-            LanguageMenuButton(flagImage: "IT", language: "Italiano")
-            LanguageMenuButton(flagImage: "ENG", language: "Inglese")
-            LanguageMenuButton(flagImage: "FR", language: "Francese")
-            LanguageMenuButton(flagImage: "SP", language: "Spagnolo")
+            LanguageMenuButton(flagImage: "icons/flags/italy", language: "Italiano")
+            LanguageMenuButton(flagImage: "icons/flags/uk", language: "Inglese")
+            LanguageMenuButton(flagImage: "icons/flags/france", language: "Francese")
+            LanguageMenuButton(flagImage: "icons/flags/spain", language: "Spagnolo")
         }
         .padding(20)
     }
@@ -137,7 +137,7 @@ struct CustomButton_Allenati: View {
     var body: some View {
         NavigationLink(destination: LevelSelectionView(viewContext: "allenati")) {
             VStack {
-                Image("Allenati")
+                Image(imageName)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
@@ -180,7 +180,7 @@ struct CustomButton_Lingua: View {
             }
         }) {
             HStack(alignment: .center, spacing: 65) {
-                Image("Lingua")
+                Image("icons/languages")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 65, height: 65)

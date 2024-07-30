@@ -77,7 +77,7 @@ struct CustomButton_Level: View {
                         )
                     HStack (spacing: 13) {
                         ForEach(0..<(starsForDiff[lvNumber] ?? 0), id: \.self) { _ in
-                            Image("StellaGialla")
+                            Image("icons/star_yellow")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 27, height: 27)
