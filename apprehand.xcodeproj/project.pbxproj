@@ -15,6 +15,9 @@
 		EA08E86F2C592BC100004021 /* apprehandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E86E2C592BC100004021 /* apprehandTests.swift */; };
 		EA08E8792C592BC100004021 /* apprehandUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E8782C592BC100004021 /* apprehandUITests.swift */; };
 		EA08E87B2C592BC100004021 /* apprehandUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E87A2C592BC100004021 /* apprehandUITestsLaunchTests.swift */; };
+		EA08E8882C59317200004021 /* CameraOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E8872C59317200004021 /* CameraOverlayView.swift */; };
+		EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E88A2C5931A600004021 /* LevelSelectionView.swift */; };
+		EA08E88E2C5931A600004021 /* SharedResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E88B2C5931A600004021 /* SharedResources.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +49,9 @@
 		EA08E8742C592BC100004021 /* apprehandUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = apprehandUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA08E8782C592BC100004021 /* apprehandUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = apprehandUITests.swift; sourceTree = "<group>"; };
 		EA08E87A2C592BC100004021 /* apprehandUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = apprehandUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		EA08E8872C59317200004021 /* CameraOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraOverlayView.swift; sourceTree = "<group>"; };
+		EA08E88A2C5931A600004021 /* LevelSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelSelectionView.swift; sourceTree = "<group>"; };
+		EA08E88B2C5931A600004021 /* SharedResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedResources.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +104,9 @@
 			children = (
 				EA08E85B2C592BC000004021 /* apprehandApp.swift */,
 				EA08E85D2C592BC000004021 /* ContentView.swift */,
+				EA08E88A2C5931A600004021 /* LevelSelectionView.swift */,
+				EA08E88B2C5931A600004021 /* SharedResources.swift */,
+				EA08E8872C59317200004021 /* CameraOverlayView.swift */,
 				EA08E85F2C592BC000004021 /* Item.swift */,
 				EA08E8612C592BC100004021 /* Assets.xcassets */,
 				EA08E8632C592BC100004021 /* Preview Content */,
@@ -260,8 +269,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA08E8882C59317200004021 /* CameraOverlayView.swift in Sources */,
 				EA08E85E2C592BC000004021 /* ContentView.swift in Sources */,
+				EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */,
 				EA08E8602C592BC000004021 /* Item.swift in Sources */,
+				EA08E88E2C5931A600004021 /* SharedResources.swift in Sources */,
 				EA08E85C2C592BC000004021 /* apprehandApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

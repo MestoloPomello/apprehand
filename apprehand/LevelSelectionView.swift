@@ -52,7 +52,7 @@ struct CustomButton_Level: View {
         Button(action: {
             // Azione del pulsante
         }) {
-            NavigationLink(destination: CameraOverlayView(lvNumber: lvNumber, viewContext: context)) {
+            //NavigationLink(destination: CameraOverlayView(lvNumber: lvNumber, viewContext: context)) {
                 VStack {
                     Text("Livello")
                         .font(.system(size: 25))
@@ -91,7 +91,7 @@ struct CustomButton_Level: View {
                 )
                 .cornerRadius(15)
                 .shadow(color: gradientsForContext[context]!.ombra, radius: 0, x: 0, y: 5)
-            }
+            //}
         }
         .buttonStyle(.plain)
     }

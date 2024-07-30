@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 import CoreML
 import Vision
-
+/*
 struct CameraView: UIViewControllerRepresentable {
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         var parent: CameraView
@@ -20,6 +20,7 @@ struct CameraView: UIViewControllerRepresentable {
             self.model = model
             self.request = VNCoreMLRequest(model: model, completionHandler: self.handleRequest)
             self.request.imageCropAndScaleOption = .scaleFill
+             
         }
         
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -191,3 +192,5 @@ struct CameraOverlayView_Previews: PreviewProvider {
         CameraOverlayView(lvNumber: 1, viewContext: "impara")
     }
 }
+
+*/

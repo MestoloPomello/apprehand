@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct Menu_View: View {
+struct ContentView: View {
     @State private var showLanguageMenu = false
     
     var body: some View {
@@ -209,6 +209,6 @@ struct CustomButton_Lingua: View {
 
 struct Menu_ViewPreviews: PreviewProvider {
     static var previews: some View {
-        Menu_View()
+        ContentView()
     }
 }
