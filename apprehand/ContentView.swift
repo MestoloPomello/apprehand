@@ -16,11 +16,11 @@ struct ContentView: View {
                 VStack(spacing: 20) {
                     // Prima riga di pulsanti
                     HStack(spacing: 20) {
-                        CustomButton_Impara(imageName: "icons/book", title: "Impara", gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)])
-                        CustomButton_Allenati(imageName: "icons/bench-barbel", title: "Allenati", gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] )
+                        CustomButton_Impara(imageName: "book", title: "Impara", gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)])
+                        CustomButton_Allenati(imageName: "bench-barbel", title: "Allenati", gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] )
                     }
                     // Seconda riga di pulsanti
-                    CustomButton_Lingua(imageName: "globe", title: "Lingua", gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
+                    CustomButton_Lingua(imageName: "languages", title: "Lingua", gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
                     .frame(width: 200, height: 100) // Dimensioni personalizzate per pulsante più grande
                 }
                 .padding(.top, 250)
@@ -61,7 +61,7 @@ struct CustomButton_Impara: View {
     var body: some View {
         NavigationLink(destination: LevelSelectionView(viewContext: "impara")) {
             VStack {
-                Image("icons/bench-barbel")
+                Image(imageName)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
@@ -180,7 +180,7 @@ struct CustomButton_Lingua: View {
             }
         }) {
             HStack(alignment: .center, spacing: 65) {
-                Image("icons/languages")
+                Image(imageName)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 65, height: 65)
