@@ -13,14 +13,30 @@ var starsForDiff = [
 
 
 struct LevelSelectionView: View {
+    @Binding var navigationPath: NavigationPath
     var viewContext: String
     @State private var numberOfLevels: Int = 8
     
     var body: some View {
-        NavigationView {
+        //NavigationView {
+        ZStack {
+            Color.white.ignoresSafeArea()
+            
             ScrollView {
                 ZStack {
                     VStack(spacing: 38) {
+                        HStack {
+                            Button(action: {
+                                navigationPath = NavigationPath()
+                                navigationPath.append(Screen.contentView)
+                            }) {
+                                Image(systemName: "chevron.backward")
+                                Text("Indietro")
+                            }
+                            .padding(.leading)
+                            Spacer()
+                        }
+                        
                         ForEach(0..<(numberOfLevels / 2), id: \.self) { i in
                             HStack(spacing: 23) {
                                 CustomButton_Level(
@@ -37,9 +53,24 @@ struct LevelSelectionView: View {
                         }
                     }
                     .padding(.top, 38)
+                    /*.toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button(action: {
+                                navigationPath = NavigationPath()
+                                navigationPath.append(Screen.contentView)
+                            }) {
+                                Image(systemName: "chevron.backward")
+                                Text("Indietro")
+                            }
+                        }
+                    }*/
                 }
             }
         }
+        .navigationTitle("")
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
+        //}
     }
 }
 
@@ -77,7 +108,7 @@ struct CustomButton_Level: View {
                         )
                     HStack (spacing: 13) {
                         ForEach(0..<(starsForDiff[lvNumber] ?? 0), id: \.self) { _ in
-                            Image("icons/star_yellow")
+                            Image("star_yellow")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 27, height: 27)
@@ -97,9 +128,11 @@ struct CustomButton_Level: View {
     }
 }
 
-struct LevelSelectionView_Previews: PreviewProvider {
+/*struct LevelSelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        LevelSelectionView(viewContext: "impara")
+        LevelSelectionView(
+            navigationPath: nil, viewContext: "impara"
+        )
     }
-}
+}*/
 

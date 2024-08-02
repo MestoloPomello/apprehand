@@ -1,5 +1,11 @@
 import SwiftUI
 
+enum Screen: Hashable {
+    case resultsView
+    case levelSelectionView
+    case contentView
+}
+
 extension Color {
     init(hex: Int, opacity: Double = 1) {
         self.init(

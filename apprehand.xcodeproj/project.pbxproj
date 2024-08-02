@@ -18,6 +18,7 @@
 		EA08E8882C59317200004021 /* CameraOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E8872C59317200004021 /* CameraOverlayView.swift */; };
 		EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E88A2C5931A600004021 /* LevelSelectionView.swift */; };
 		EA08E88E2C5931A600004021 /* SharedResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA08E88B2C5931A600004021 /* SharedResources.swift */; };
+		EA84D0282C5A7D5600F5B1EF /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84D0272C5A7D5600F5B1EF /* ResultsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		EA08E8872C59317200004021 /* CameraOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraOverlayView.swift; sourceTree = "<group>"; };
 		EA08E88A2C5931A600004021 /* LevelSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelSelectionView.swift; sourceTree = "<group>"; };
 		EA08E88B2C5931A600004021 /* SharedResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedResources.swift; sourceTree = "<group>"; };
+		EA84D0272C5A7D5600F5B1EF /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 				EA08E85D2C592BC000004021 /* ContentView.swift */,
 				EA08E88A2C5931A600004021 /* LevelSelectionView.swift */,
 				EA08E88B2C5931A600004021 /* SharedResources.swift */,
+				EA84D0272C5A7D5600F5B1EF /* ResultsView.swift */,
 				EA08E8872C59317200004021 /* CameraOverlayView.swift */,
 				EA08E85F2C592BC000004021 /* Item.swift */,
 				EA08E8612C592BC100004021 /* Assets.xcassets */,
@@ -273,6 +276,7 @@
 				EA08E85E2C592BC000004021 /* ContentView.swift in Sources */,
 				EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */,
 				EA08E8602C592BC000004021 /* Item.swift in Sources */,
+				EA84D0282C5A7D5600F5B1EF /* ResultsView.swift in Sources */,
 				EA08E88E2C5931A600004021 /* SharedResources.swift in Sources */,
 				EA08E85C2C592BC000004021 /* apprehandApp.swift in Sources */,
 			);
