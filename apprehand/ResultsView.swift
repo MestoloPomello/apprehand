@@ -39,7 +39,10 @@ struct ResultsView: View {
                     .frame(width: 200, height: 200)
                     
                             Button(action: {
-                                navigationPath.append(Screen.levelSelectionView)
+                                if navigationPath.count > 1 {
+                                    navigationPath.removeLast()
+                                }
+                                navigationPath.append(Screen.levelSelectionView("allenati"))
                             }) {
                                 Text("Menu")
                                     .font(.title)

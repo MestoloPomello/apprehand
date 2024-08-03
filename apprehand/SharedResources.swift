@@ -2,8 +2,9 @@ import SwiftUI
 
 enum Screen: Hashable {
     case resultsView
-    case levelSelectionView
+    case levelSelectionView(String)
     case contentView
+    case cameraOverlayView(Int, String)
 }
 
 extension Color {

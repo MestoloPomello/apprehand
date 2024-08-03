@@ -27,6 +27,10 @@ struct LevelSelectionView: View {
                     VStack(spacing: 38) {
                         HStack {
                             Button(action: {
+                                /*if navigationPath.count > 1 {
+                                    navigationPath.removeLast()
+                                }
+                                navigationPath.append(Screen.contentView)*/
                                 navigationPath = NavigationPath()
                                 navigationPath.append(Screen.contentView)
                             }) {
@@ -42,12 +46,14 @@ struct LevelSelectionView: View {
                                 CustomButton_Level(
                                     lvNumber: (i * 2) + 1,
                                     context: viewContext,
-                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray],
+                                    navigationPath: $navigationPath
                                 )
                                 CustomButton_Level(
                                     lvNumber: (i * 2) + 2,
                                     context: viewContext,
-                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray],
+                                    navigationPath: $navigationPath
                                 )
                             }
                         }
@@ -78,10 +84,11 @@ struct CustomButton_Level: View {
     var lvNumber: Int
     var context: String
     var gradientColors: [Color]
+    @Binding var navigationPath: NavigationPath
     
     var body: some View {
         Button(action: {
-            // Azione del pulsante
+            navigationPath.append(Screen.cameraOverlayView(lvNumber, context))
         }) {
             //NavigationLink(destination: CameraOverlayView(lvNumber: lvNumber, viewContext: context)) {
                 VStack {

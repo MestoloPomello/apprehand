@@ -262,7 +262,9 @@ struct ContentView: View {
                             gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
                             shadowColor: Color(hex: 0x4c3fe4)
                         ) {
-                            LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
+                            //LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
+                            navigationPath = NavigationPath()
+                            navigationPath.append(Screen.levelSelectionView("impara"))
                         }
                         CustomButton(
                             imageName: "bench-barbel",
@@ -270,7 +272,9 @@ struct ContentView: View {
                             gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)],
                             shadowColor: Color(hex: 0x277099)
                         ) {
-                            LevelSelectionView(navigationPath: $navigationPath, viewContext: "allenati")
+                            //LevelSelectionView(navigationPath: $navigationPath, viewContext: "allenati")
+                            navigationPath = NavigationPath()
+                            navigationPath.append(Screen.levelSelectionView("allenati"))
                         }
                     }
                     // Seconda riga di pulsanti
@@ -304,28 +308,31 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(for: Screen.self) { screen in
-                switch screen {
-                case .contentView:
-                    ContentView()
-                case .resultsView:
-                    ResultsView(navigationPath: $navigationPath)
-                case .levelSelectionView:
-                    LevelSelectionView(navigationPath: $navigationPath, viewContext: "allenati")
-                }
+                            switch screen {
+                            case .contentView:
+                                ContentView()
+                            case .levelSelectionView(let context):
+                                LevelSelectionView(navigationPath: $navigationPath, viewContext: context)
+                            case .cameraOverlayView(let level, let context):
+                                /*CameraOverlayView(navigationPath: $navigationPath, lvNumber: level, viewContext: context)*/
+                                LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
+                            case .resultsView:
+                                ResultsView(navigationPath: $navigationPath)
+                            }
             }
         }
     }
 }
 
-struct CustomButton<Destination: View>: View {
+struct CustomButton: View {
     var imageName: String
     var title: String
     var gradientColors: [Color]
     var shadowColor: Color
-    var destination: () -> Destination
+    var action: () -> Void
     
     var body: some View {
-        NavigationLink(destination: destination()) {
+        Button(action: action) {
             VStack {
                 Image(imageName)
                     .resizable()
