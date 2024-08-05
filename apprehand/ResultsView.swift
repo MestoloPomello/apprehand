@@ -62,6 +62,12 @@ struct ResultsView: View {
                 switch screen {
                 case .levelSelectionView(let context):
                     LevelSelectionView(navigationPath: $navigationPath, viewContext: context)
+                case .contentView:
+                    ContentView()
+                case .resultsView:
+                    ResultsView(navigationPath: $navigationPath, score: (rightGuesses * 100 / lettersLevels[lvNumber]!.count))
+                case .cameraOverlayView:
+                    CameraOverlayView(navigationPath: $navigationPath, lvNumber: lvNumber, viewContext: "impara")
                 }
             }
             // .toolbar {

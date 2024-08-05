@@ -81,6 +81,12 @@ struct LevelSelectionView: View {
             case .cameraOverlayView(let level, let context):
                 // CameraOverlayView(navigationPath: $navigationPath, viewContext: viewContext)
                 ResultsView(navigationPath: $navigationPath, score: 50.0)
+            case .contentView:
+                ContentView()
+            case .levelSelectionView(let context):
+                LevelSelectionView(navigationPath: $navigationPath, viewContext: context)
+            case .resultsView:
+                ResultsView(navigationPath: $navigationPath)
             }
         }
     }

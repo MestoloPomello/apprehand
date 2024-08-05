@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 import CoreML
 import Vision
-/*
+
 struct CameraView: UIViewControllerRepresentable {
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         var parent: CameraView
@@ -96,6 +96,8 @@ struct CameraView: UIViewControllerRepresentable {
 }
 
 struct CameraOverlayView: View {
+    @Binding var navigationPath: NavigationPath
+
     @State private var currentLetterIndex: Int = 0
     @State private var showResult: Bool = false
     @State private var isCorrect: Bool = false
@@ -103,6 +105,7 @@ struct CameraOverlayView: View {
     
     var lvNumber: Int
     var viewContext: String
+    var rightGuesses: Int = 0
     
     var body: some View {
         let letters = lettersLevels[lvNumber] ?? []
@@ -123,6 +126,7 @@ struct CameraOverlayView: View {
                         .frame(width: 100, height: 100)
                     
                     if isCorrect {
+                        rightGuesses++
                         Button(action: nextLetter) {
                             Text("Prossima")
                                 .font(.title)
@@ -159,6 +163,18 @@ struct CameraOverlayView: View {
                 .padding()
             }
         }
+        .navigationDestination(for: Screen.self) { screen in
+            switch screen {
+            case .cameraOverlayView(let level, let context):
+                CameraOverlayView(navigationPath: $navigationPath, lvNumber: level, viewContext: context)
+            case .contentView:
+                ContentView()
+            case .levelSelectionView():
+                LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
+            case .resultsView():
+                ResultsView(navigationPath: $navigationPath, score: (rightGuesses * 100 / lettersLevels[lvNumber]!.count))
+            }
+        }
     }
     
     func handlePrediction(prediction: String) {
@@ -177,8 +193,16 @@ struct CameraOverlayView: View {
             currentLetterIndex += 1
             letter = lettersLevels[lvNumber]![currentLetterIndex]
         } else {
-            // Fine livello, torna alla view di selezione del livello
-            // Implementa il codice per tornare alla view di selezione del livello
+            // Lettere finite - 2 casi: 
+            // - se allenati, vai alla ResultView
+            // - altrimenti LevelSelectionView da ri-renderizzare coi dati
+            if viewContext == "allenati" {
+                navigationPath = NavigationPath()
+                navigationPath.append(Screen.resultsView)
+            } else {
+                navigationPath = NavigationPath()
+                navigationPath.append(Screen.levelSelectionView)
+            }
         }
     }
     
@@ -192,5 +216,3 @@ struct CameraOverlayView_Previews: PreviewProvider {
         CameraOverlayView(lvNumber: 1, viewContext: "impara")
     }
 }
-
-*/
