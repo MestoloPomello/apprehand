@@ -76,7 +76,13 @@ struct LevelSelectionView: View {
         .navigationTitle("")
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
-        //}
+        .navigationDestination(for: Screen.self) { screen in
+            switch screen {
+            case .cameraOverlayView(let level, let context):
+                // CameraOverlayView(navigationPath: $navigationPath, viewContext: viewContext)
+                ResultsView(navigationPath: $navigationPath, score: 50.0)
+            }
+        }
     }
 }
 
@@ -142,4 +148,3 @@ struct CustomButton_Level: View {
         )
     }
 }*/
-

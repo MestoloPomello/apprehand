@@ -39,9 +39,10 @@ struct ResultsView: View {
                     .frame(width: 200, height: 200)
                     
                             Button(action: {
-                                if navigationPath.count > 1 {
-                                    navigationPath.removeLast()
-                                }
+                                // if navigationPath.count > 1 {
+                                //     navigationPath.removeLast()
+                                // }
+                                navigationPath = NavigationPath()
                                 navigationPath.append(Screen.levelSelectionView("allenati"))
                             }) {
                                 Text("Menu")
@@ -57,17 +58,26 @@ struct ResultsView: View {
                 }
             }
             .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        navigationPath = NavigationPath()
-                        navigationPath.append(Screen.contentView)
-                    }) {
-                        Image(systemName: "chevron.backward")
-                        Text("Indietro")
-                    }
+            .navigationDestination(for: Screen.self) { screen in
+                switch screen {
+                case .levelSelectionView(let context):
+                    LevelSelectionView(navigationPath: $navigationPath, viewContext: context)
                 }
             }
+            // .toolbar {
+            //     ToolbarItem(placement: .navigationBarLeading) {
+            //         Button(action: {
+            //             if navigationPath.count > 1 {
+            //                 navigationPath.removeLast()
+            //             }
+            //             navigationPath.append(Screen.contentView)
+            //         }) {
+            //             Image(systemName: "chevron.backward")
+            //             Text("Indietro")
+            //         }
+            //     }
+            // }
+            
     }
 }
 
