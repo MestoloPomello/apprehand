@@ -1,95 +1,85 @@
 import SwiftUI
 
 struct ResultsView: View {
-    @Binding var navigationPath: NavigationPath
-    @State private var score: Double = 70.0 // Variabile per il punteggio, qui puoi modificarlo in base alle risposte corrette
+    @ObservedObject var navigationPath: Navigation
+    @State var score: Double = 70.0
+    
+    let gradientData = gradientsForContext["allenati"]!
 
     var body: some View {
-            ZStack  {
-                Image("background")
-                    .resizable() // Rende l'immagine ridimensionabile
-                    .scaledToFill() // Rende l'immagine adatta a riempire l'intera area
-                    .ignoresSafeArea() // Fa sì che l'immagine riempia anche le aree sicure (come notch, bordi ecc.)
-                VStack {
-                    Text("Allenamento completato")
-                        .font(.largeTitle)
-                        .padding()
-                    
-                    ZStack {
-                        Circle()
-                            .stroke(lineWidth: 20)
-                            .opacity(0.3)
-                            .foregroundColor(.gray)
-                        
-                        Circle()
-                            .trim(from: 0.0, to: CGFloat(min(self.score / 100, 1.0)))
-                            .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
-                            .foregroundColor(.green)
-                            .rotationEffect(Angle(degrees: 270.0))
-                        //	.animation(.linear)
-                        
-                        VStack {
-                            Text("Punteggio")
-                                .font(.title)
-                            Text("\(Int(score))%")
-                                .font(.largeTitle)
-                                .bold()
-                        }
-                    }
-                    .frame(width: 200, height: 200)
-                    
-                            Button(action: {
-                                // if navigationPath.count > 1 {
-                                //     navigationPath.removeLast()
-                                // }
-                                navigationPath = NavigationPath()
-                                navigationPath.append(Screen.levelSelectionView("allenati"))
-                            }) {
-                                Text("Menu")
-                                    .font(.title)
-                                    .padding()
-                                    .frame(width: 200)
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                            .padding(.top, 50)
-                    Spacer()
-                }
-            }
-            .navigationBarBackButtonHidden(true)
-            .navigationDestination(for: Screen.self) { screen in
-                switch screen {
-                case .levelSelectionView(let context):
-                    LevelSelectionView(navigationPath: $navigationPath, viewContext: context)
-                case .contentView:
-                    ContentView()
-                case .resultsView:
-                    ResultsView(navigationPath: $navigationPath, score: (rightGuesses * 100 / lettersLevels[lvNumber]!.count))
-                case .cameraOverlayView:
-                    CameraOverlayView(navigationPath: $navigationPath, lvNumber: lvNumber, viewContext: "impara")
-                }
-            }
-            // .toolbar {
-            //     ToolbarItem(placement: .navigationBarLeading) {
-            //         Button(action: {
-            //             if navigationPath.count > 1 {
-            //                 navigationPath.removeLast()
-            //             }
-            //             navigationPath.append(Screen.contentView)
-            //         }) {
-            //             Image(systemName: "chevron.backward")
-            //             Text("Indietro")
-            //         }
-            //     }
-            // }
+        ZStack {
+            Image("background_plain")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
             
+            VStack {
+                Text("Allenamento\ncompletato")
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 102)
+                    .font(.system(size: 40))
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .shadow(
+                        color: Color.black.opacity(0.2),
+                        radius: 4,
+                        x: 0,
+                        y: 4
+                    )
+                
+                Spacer()
+                    .frame(height: 130)
+
+                ZStack {
+                    Circle()
+                        .stroke(lineWidth: 20)
+                        .opacity(0.3)
+                        .foregroundColor(.gray)
+                    
+                    Circle()
+                        .trim(from: 0.0, to: CGFloat(min(self.score / 100, 1.0)))
+                        .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
+                        .foregroundColor(.green)
+                        .rotationEffect(Angle(degrees: 270.0))
+                    
+                    VStack {
+                        Text("Punteggio")
+                        .font(.system(size: 20))
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                        Text("\(Int(score))%")
+                            .font(.system(size: 40))
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                    }
+                }
+                .frame(width: 249, height: 249)
+                
+                Button(action: {
+                    navigateToRoot()
+                }) {
+                    Text("Menu")
+                        .font(.title) // Modifica la dimensione del testo
+                        .padding() // Spazio interno del bottone
+                        .frame(width: 182, height: 88) // Dimensione del bottone
+                        .background(LinearGradient(gradient: Gradient(colors: gradientData.colori), startPoint: .top, endPoint: .bottom))
+                        .foregroundColor(.white)
+                        .cornerRadius(15)
+                        
+                }
+                .padding(.top, 70)
+                
+                Spacer()
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+    }
+
+    private func navigateToRoot() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = UIHostingController(rootView: LevelSelectionView(navigationPath: navigationPath, viewContext: "allenati"))
+            window.makeKeyAndVisible()
+        }
     }
 }
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
-

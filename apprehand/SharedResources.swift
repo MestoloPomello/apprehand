@@ -1,11 +1,35 @@
 import SwiftUI
 
 enum Screen: Hashable {
-    case resultsView
+    case resultsView(Int)
     case levelSelectionView(String)
     case contentView
     case cameraOverlayView(Int, String)
 }
+
+class Navigation: ObservableObject {
+    @Published var path = [Screen]()
+}
+
+class NavigationController {
+    @ViewBuilder
+    static func navigate(to screen: Screen, with navigation: Navigation) -> some View {
+        switch screen {
+        case .contentView:
+            ContentView()
+        case .levelSelectionView("impara"):
+            LevelSelectionView(navigationPath: navigation, viewContext: "impara")
+        case .levelSelectionView("allenati"):
+            LevelSelectionView(navigationPath: navigation,
+                viewContext: "allenati")
+        case .resultsView:
+            ResultsView(navigationPath: navigation)
+        default :
+            ContentView()
+}
+    }
+}
+
 
 extension Color {
     init(hex: Int, opacity: Double = 1) {
