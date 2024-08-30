@@ -18,10 +18,11 @@ class NavigationController {
         case .contentView:
             ContentView()
         case .levelSelectionView("impara"):
-            LevelSelectionView(navigationPath: navigation, viewContext: "impara")
+            //LevelSelectionView(navigationPath: navigation, viewContext: "impara")
+            LevelSelectionView(viewContext: "impara", navigationPath: navigation)
         case .levelSelectionView("allenati"):
-            LevelSelectionView(navigationPath: navigation,
-                viewContext: "allenati")
+            //LevelSelectionView(navigationPath: navigation,                viewContext: "allenati")
+            LevelSelectionView(viewContext: "allenati", navigationPath: navigation)
         case .resultsView:
             ResultsView(navigationPath: navigation)
         default :
@@ -74,20 +75,16 @@ let lettersLevels: [Int: [String]] = [
     8: ["v", "w", "x", "y"]
 ]
 
-var chosenLanguage: String = "it"
-func getTranslatedText() {
+var chosenLanguage: String = "italian"
+func getTranslatedText() -> [String: String] {
     switch(chosenLanguage) {
-        case "en":
-            TRANSLATED_TEXT = EN_TRANSLATED_TEXT
-            break
-        case "fr":
-            TRANSLATED_TEXT = FR_TRANSLATED_TEXT
-            break
-        case "es":
-            TRANSLATED_TEXT = ES_TRANSLATED_TEXT
-            break
-        case "it":
+        case "english":
+            return EN_TRANSLATED_TEXT
+        case "french":
+            return FR_TRANSLATED_TEXT
+        case "spanish":
+            return ES_TRANSLATED_TEXT
         default:
-            TRANSLATED_TEXT = IT_TRANSLATED_TEXT
+            return IT_TRANSLATED_TEXT
     }
 }

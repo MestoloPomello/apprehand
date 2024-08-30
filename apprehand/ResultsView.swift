@@ -16,7 +16,7 @@ struct ResultsView: View {
                 .ignoresSafeArea()
             
             VStack {
-                Text(TRANSLATED_TEXT["training_completed"])
+                Text(TRANSLATED_TEXT["training_completed"]!)
                     .multilineTextAlignment(.center)
                     .padding(.top, 102)
                     .font(.system(size: 40))
@@ -64,7 +64,9 @@ struct ResultsView: View {
                         .font(.title) // Modifica la dimensione del testo
                         .padding() // Spazio interno del bottone
                         .frame(width: 182, height: 88) // Dimensione del bottone
-                        .background(LinearGradient(gradient: Gradient(colors: gradientData.colori), startPoint: .top, endPoint: .bottom))
+                        //.background(LinearGradient(gradient: Gradient(colors: gradientData.colori), startPoint: .top, endPoint: .bottom))
+                        .background(LinearGradient(gradient: Gradient(colors: gradientsForContext["allenati"]?.colori ?? [Color.white, Color.gray]), startPoint: .top, endPoint: .bottom))
+                        .shadow(color: gradientsForContext["allenati"]!.ombra, radius: 0, x: 0, y: 5)
                         .foregroundColor(.white)
                         .cornerRadius(15)
                         
@@ -80,7 +82,8 @@ struct ResultsView: View {
     private func navigateToRoot() {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
-            window.rootViewController = UIHostingController(rootView: LevelSelectionView(navigationPath: navigationPath, viewContext: "allenati"))
+            //window.rootViewController = UIHostingController(rootView: LevelSelectionView(navigationPath: navigationPath, viewContext: "allenati"))
+            window.rootViewController = UIHostingController(rootView: LevelSelectionView(viewContext: "allenati", navigationPath: navigationPath))
             window.makeKeyAndVisible()
         }
     }

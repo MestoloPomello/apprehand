@@ -1,11 +1,13 @@
 import SwiftUI
 
+//public var TRANSLATED_TEXT: [String: String] = [:]
+
 struct ContentView: View {
     @State private var showLanguageMenu = false
     //@State private var navigationPath = NavigationPath()
     @StateObject var navigationPath = Navigation()
-
-    var TRANSLATED_TEXT: [String: String] = getTranslatedText()    
+    
+    public var TRANSLATED_TEXT = getTranslatedText()
 
     var body: some View {
         NavigationStack(path: $navigationPath.path) {
@@ -22,7 +24,7 @@ struct ContentView: View {
                     HStack(spacing: 20) {
                         CustomButton(
                             imageName: "book",
-                            title: TRANSLATED_TEXT["learn"],
+                            title: TRANSLATED_TEXT["learn"]!,
                             gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
                             shadowColor: Color(hex: 0x4c3fe4)
                         ) {
@@ -33,7 +35,7 @@ struct ContentView: View {
                         }
                         CustomButton(
                             imageName: "bench-barbel",
-                            title: TRANSLATED_TEXT["train"],
+                            title: TRANSLATED_TEXT["train"]!,
                             gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)],
                             shadowColor: Color(hex: 0x277099)
                         ) {
@@ -44,7 +46,7 @@ struct ContentView: View {
                         }
                     }
                     // Seconda riga di pulsanti
-                    CustomButton_Lingua(imageName: "languages", title: TRANSLATED_TEXT["language"], gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
+                    CustomButton_Lingua(imageName: "languages", title: TRANSLATED_TEXT["language"]!, gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
                         .frame(width: 200, height: 100) // Dimensioni personalizzate per pulsante più grande
                 }
                 .padding(.top, 250)
@@ -159,12 +161,13 @@ struct CustomButton_Lingua: View {
 }
 
 struct LanguageMenu: View {
+    public var TRANSLATED_TEXT = getTranslatedText()
     var body: some View {
         VStack(spacing: 20) {
-            LanguageMenuButton(flagImage: "italy", language: TRANSLATED_TEXT["italian"])
-            LanguageMenuButton(flagImage: "uk", language: TRANSLATED_TEXT["english"])
-            LanguageMenuButton(flagImage: "france", language: TRANSLATED_TEXT["french"])
-            LanguageMenuButton(flagImage: "spain", language: TRANSLATED_TEXT["spanish"])
+            LanguageMenuButton(flagImage: "italy", language: "italian")
+            LanguageMenuButton(flagImage: "uk", language: "english")
+            LanguageMenuButton(flagImage: "france", language: "french")
+            LanguageMenuButton(flagImage: "spain", language: "spanish")
         }
         .padding(20)
     }
@@ -174,28 +177,35 @@ struct LanguageMenuButton: View {
     var flagImage: String
     var language: String
     
+    var TRANSLATED_TEXT = getTranslatedText()
+    
     var body: some View {
-        HStack(spacing: 30) {
-            Image(flagImage)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 65, height: 65)
-            Text(language)
-                .font(.system(size: 25))
-                .foregroundColor(.black)
-                .fontWeight(.bold)
-                .shadow(
-                    color: Color.black.opacity(0.2),
-                    radius: 4,
-                    x: 0,
-                    y: 4
-                )
-            Spacer()
+        Button(action: {
+            chosenLanguage = language
+            // TODO: spostamento chosenlanguage in file
+        }) {
+            HStack(spacing: 30) {
+                Image(flagImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 65, height: 65)
+                Text(TRANSLATED_TEXT[language]!)
+                    .font(.system(size: 25))
+                    .foregroundColor(.black)
+                    .fontWeight(.bold)
+                    .shadow(
+                        color: Color.black.opacity(0.2),
+                        radius: 4,
+                        x: 0,
+                        y: 4
+                    )
+                Spacer()
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(10)
+            .shadow(radius: 5)
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 5)
     }
 }
 

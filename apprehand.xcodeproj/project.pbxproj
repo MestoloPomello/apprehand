@@ -21,6 +21,10 @@
 		EA84D0282C5A7D5600F5B1EF /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA84D0272C5A7D5600F5B1EF /* ResultsView.swift */; };
 		EA99A4DD2C80BB94004D9CFF /* ASL_Classifier.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = EA99A4DB2C80BB94004D9CFF /* ASL_Classifier.mlmodel */; };
 		EA99A4DF2C80CC08004D9CFF /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA99A4DE2C80CC08004D9CFF /* CameraView.swift */; };
+		EAC19FA82C8209D9001F48E1 /* it.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FA62C8209D8001F48E1 /* it.swift */; };
+		EAC19FAA2C820AF4001F48E1 /* en.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FA92C820AF4001F48E1 /* en.swift */; };
+		EAC19FAC2C820AFC001F48E1 /* fr.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FAB2C820AFC001F48E1 /* fr.swift */; };
+		EAC19FAE2C820B07001F48E1 /* es.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FAD2C820B07001F48E1 /* es.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +62,10 @@
 		EA84D0272C5A7D5600F5B1EF /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
 		EA99A4DB2C80BB94004D9CFF /* ASL_Classifier.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = ASL_Classifier.mlmodel; sourceTree = "<group>"; };
 		EA99A4DE2C80CC08004D9CFF /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		EAC19FA62C8209D8001F48E1 /* it.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = it.swift; sourceTree = "<group>"; };
+		EAC19FA92C820AF4001F48E1 /* en.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = en.swift; sourceTree = "<group>"; };
+		EAC19FAB2C820AFC001F48E1 /* fr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = fr.swift; sourceTree = "<group>"; };
+		EAC19FAD2C820B07001F48E1 /* es.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = es.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +116,7 @@
 		EA08E85A2C592BC000004021 /* apprehand */ = {
 			isa = PBXGroup;
 			children = (
+				EAC19FA72C8209D8001F48E1 /* localization */,
 				EA99A4DC2C80BB94004D9CFF /* Models */,
 				EA08E85B2C592BC000004021 /* apprehandApp.swift */,
 				EA08E85D2C592BC000004021 /* ContentView.swift */,
@@ -154,6 +163,17 @@
 				EA99A4DB2C80BB94004D9CFF /* ASL_Classifier.mlmodel */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		EAC19FA72C8209D8001F48E1 /* localization */ = {
+			isa = PBXGroup;
+			children = (
+				EAC19FA62C8209D8001F48E1 /* it.swift */,
+				EAC19FA92C820AF4001F48E1 /* en.swift */,
+				EAC19FAB2C820AFC001F48E1 /* fr.swift */,
+				EAC19FAD2C820B07001F48E1 /* es.swift */,
+			);
+			path = localization;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -288,10 +308,14 @@
 			files = (
 				EA08E8882C59317200004021 /* CameraOverlayView.swift in Sources */,
 				EA08E85E2C592BC000004021 /* ContentView.swift in Sources */,
+				EAC19FA82C8209D9001F48E1 /* it.swift in Sources */,
 				EA99A4DD2C80BB94004D9CFF /* ASL_Classifier.mlmodel in Sources */,
 				EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */,
 				EA08E8602C592BC000004021 /* Item.swift in Sources */,
 				EA84D0282C5A7D5600F5B1EF /* ResultsView.swift in Sources */,
+				EAC19FAC2C820AFC001F48E1 /* fr.swift in Sources */,
+				EAC19FAA2C820AF4001F48E1 /* en.swift in Sources */,
+				EAC19FAE2C820B07001F48E1 /* es.swift in Sources */,
 				EA08E88E2C5931A600004021 /* SharedResources.swift in Sources */,
 				EA99A4DF2C80CC08004D9CFF /* CameraView.swift in Sources */,
 				EA08E85C2C592BC000004021 /* apprehandApp.swift in Sources */,

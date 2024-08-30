@@ -13,50 +13,63 @@ var starsForDiff = [
 
 
 struct LevelSelectionView: View {
-    @ObservedObject var navigationPath: Navigation
+    //@ObservedObject var navigationPath: Navigation
     var viewContext: String
     @State private var numberOfLevels: Int = 8
+    @StateObject var navigationPath = Navigation()
     
     var body: some View {
-        ZStack {
-            Color.white.ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 38) {
-                    HStack {
-                        Button(action: {
-                            navigateToRoot()
-                        }) {
-                            Image(systemName: "chevron.backward")
-                            Text("Indietro")
+        NavigationStack(path: $navigationPath.path) {
+            ZStack {
+                Color.white.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 38) {
+                        HStack {
+                            Button(action: {
+                                navigateToRoot()
+                            }) {
+                                Image(systemName: "chevron.backward")
+                                Text("Indietro")
+                            }
+                            .padding(.leading)
+                            Spacer()
                         }
-                        .padding(.leading)
-                        Spacer()
-                    }
-                    
-                    ForEach(0..<(numberOfLevels / 2), id: \.self) { i in
-                        HStack(spacing: 23) {
-                            CustomButton_Level(
-                                lvNumber: (i * 2) + 1,
-                                context: viewContext,
-                                gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray],
-                                navigationPath: $navigationPath.path
-                            )
-                            CustomButton_Level(
-                                lvNumber: (i * 2) + 2,
-                                context: viewContext,
-                                gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray],
-                                navigationPath: $navigationPath.path
-                            )
+                        
+                        ForEach(0..<((Int)(numberOfLevels) / (Int)(2)), id: \.self) { i in
+                            let lvNumber1: Int = (i * 2) + 1
+                            let lvNumber2: Int = (i * 2) + 2
+                            HStack(spacing: 23) {
+                                CustomButton_Level(
+                                    lvNumber: lvNumber1,
+                                    context: viewContext,
+                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    //navigationPath: navigationPath
+                                ) {
+                                    navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
+                                }
+                                CustomButton_Level(
+                                    lvNumber: lvNumber2,
+                                    context: viewContext,
+                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    //navigationPath: navigationPath
+                                ) {
+                                    navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
+                                }
+                            }
                         }
                     }
+                    .padding(.top, 38)
                 }
-                .padding(.top, 38)
+            }
+            .navigationTitle("")
+            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
+            .navigationDestination(for: Screen.self) { screen in
+                NavigationController.navigate(to: screen, with: navigationPath)
             }
         }
-        .navigationTitle("")
-        .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
+        .environmentObject(navigationPath)
     }
     
     private func navigateToRoot() {
@@ -72,13 +85,12 @@ struct CustomButton_Level: View {
     var lvNumber: Int
     var context: String
     var gradientColors: [Color]
-    @Binding var navigationPath: [Screen]
+    //@StateObject var navigationPath = Navigation()
+    var action: () -> Void
     
     var body: some View {
-        Button(action: {
-            navigationPath.append(Screen.cameraOverlayView(lvNumber, context))
-            //navigationPath.append(Screen.resultsView(lvNumber))
-        }) {
+        
+        Button(action: action) {
             VStack {
                 Text("Livello")
                     .font(.system(size: 25))
