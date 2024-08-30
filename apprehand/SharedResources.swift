@@ -24,7 +24,7 @@ struct GradientData {
     var ombra: Color
 }
 
-var gradientsForContext: [String: GradientData] = [
+let gradientsForContext: [String: GradientData] = [
     "impara": GradientData(
         colori: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
         ombra: Color(hex: 0x4c3fe4)
@@ -39,7 +39,7 @@ var gradientsForContext: [String: GradientData] = [
     )
 ]
 
-var lettersLevels: [Int: [String]] = [
+let lettersLevels: [Int: [String]] = [
     1: ["a"],
     2: ["b", "c"],
     3: ["d", "e"],
@@ -49,3 +49,21 @@ var lettersLevels: [Int: [String]] = [
     7: ["q", "r", "t", "u"],
     8: ["v", "w", "x", "y"]
 ]
+
+var chosenLanguage: String = "it"
+func getTranslatedText() {
+    switch(chosenLanguage) {
+        case "en":
+            TRANSLATED_TEXT = EN_TRANSLATED_TEXT
+            break
+        case "fr":
+            TRANSLATED_TEXT = FR_TRANSLATED_TEXT
+            break
+        case "es":
+            TRANSLATED_TEXT = ES_TRANSLATED_TEXT
+            break
+        case "it":
+        default:
+            TRANSLATED_TEXT = IT_TRANSLATED_TEXT
+    }
+}

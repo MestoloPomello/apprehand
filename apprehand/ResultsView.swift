@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ResultsView: View {
     @Binding var navigationPath: NavigationPath
-    @State private var score: Double = 70.0 // Variabile per il punteggio, qui puoi modificarlo in base alle risposte corrette
+    @State var score: Double = 70.0 // Variabile per il punteggio, qui puoi modificarlo in base alle risposte corrette
 
     var body: some View {
             ZStack  {
@@ -11,7 +11,7 @@ struct ResultsView: View {
                     .scaledToFill() // Rende l'immagine adatta a riempire l'intera area
                     .ignoresSafeArea() // Fa sì che l'immagine riempia anche le aree sicure (come notch, bordi ecc.)
                 VStack {
-                    Text("Allenamento completato")
+                    Text(TRANSLATED_TEXT["training_completed"])
                         .font(.largeTitle)
                         .padding()
                     
@@ -29,7 +29,7 @@ struct ResultsView: View {
                         //	.animation(.linear)
                         
                         VStack {
-                            Text("Punteggio")
+                            Text(TRANSLATED_TEXT["score"])
                                 .font(.title)
                             Text("\(Int(score))%")
                                 .font(.largeTitle)
@@ -65,7 +65,7 @@ struct ResultsView: View {
                 case .contentView:
                     ContentView()
                 case .resultsView:
-                    ResultsView(navigationPath: $navigationPath, score: (rightGuesses * 100 / lettersLevels[lvNumber]!.count))
+                    ResultsView(navigationPath: $navigationPath, score: 0.00)
                 case .cameraOverlayView:
                     CameraOverlayView(navigationPath: $navigationPath, lvNumber: lvNumber, viewContext: "impara")
                 }
