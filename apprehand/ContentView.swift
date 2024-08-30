@@ -2,12 +2,13 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var showLanguageMenu = false
-    @State private var navigationPath = NavigationPath()
+    //@State private var navigationPath = NavigationPath()
+    @StateObject var navigationPath = Navigation()
 
     var TRANSLATED_TEXT: [String: String] = getTranslatedText()    
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack(path: $navigationPath.path) {
             ZStack {
                 // Immagine di sfondo
                 Image("background")
@@ -26,8 +27,9 @@ struct ContentView: View {
                             shadowColor: Color(hex: 0x4c3fe4)
                         ) {
                             //LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
-                            navigationPath = NavigationPath()
-                            navigationPath.append(Screen.levelSelectionView("impara"))
+                            //navigationPath = NavigationPath()
+                            //navigationPath.append(Screen.levelSelectionView("impara"))
+                            navigationPath.path.append(Screen.levelSelectionView("impara"))
                         }
                         CustomButton(
                             imageName: "bench-barbel",
@@ -36,8 +38,9 @@ struct ContentView: View {
                             shadowColor: Color(hex: 0x277099)
                         ) {
                             //LevelSelectionView(navigationPath: $navigationPath, viewContext: "allenati")
-                            navigationPath = NavigationPath()
-                            navigationPath.append(Screen.levelSelectionView("allenati"))
+                            //navigationPath = NavigationPath()
+                            //navigationPath.append(Screen.levelSelectionView("allenati"))
+                            navigationPath.path.append(Screen.levelSelectionView("allenati"))
                         }
                     }
                     // Seconda riga di pulsanti
@@ -71,19 +74,10 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(for: Screen.self) { screen in
-                            switch screen {
-                            case .contentView:
-                                ContentView()
-                            case .levelSelectionView(let context):
-                                LevelSelectionView(navigationPath: $navigationPath, viewContext: context)
-                            case .cameraOverlayView(let level, let context):
-                                /*CameraOverlayView(navigationPath: $navigationPath, lvNumber: level, viewContext: context)*/
-                                LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
-                            case .resultsView:
-                                ResultsView(navigationPath: $navigationPath)
-                            }
+                NavigationController.navigate(to: screen, with: navigationPath)
             }
         }
+        .environmentObject(navigationPath)
     }
 }
 
