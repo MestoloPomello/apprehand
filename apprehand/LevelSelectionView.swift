@@ -13,7 +13,6 @@ var starsForDiff = [
 
 
 struct LevelSelectionView: View {
-    //@ObservedObject var navigationPath: Navigation
     var viewContext: String
     @State private var numberOfLevels: Int = 8
     @StateObject var navigationPath = Navigation()
@@ -44,7 +43,6 @@ struct LevelSelectionView: View {
                                     lvNumber: lvNumber1,
                                     context: viewContext,
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
-                                    //navigationPath: navigationPath
                                 ) {
                                     navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
                                 }
@@ -52,7 +50,6 @@ struct LevelSelectionView: View {
                                     lvNumber: lvNumber2,
                                     context: viewContext,
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
-                                    //navigationPath: navigationPath
                                 ) {
                                     navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
                                 }
@@ -65,6 +62,18 @@ struct LevelSelectionView: View {
             .navigationTitle("")
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
+            /*.navigationDestination(for: Screen.self) { screen in
+                switch screen {
+                case .cameraOverlayView(let level, let context):
+                    CameraOverlayView(lvNumber: level, viewContext: context)
+                case .contentView:
+                    ContentView()
+                case .levelSelectionView:
+                    LevelSelectionView(viewContext: "impara")
+                case .resultsView(let score):
+                    ResultsView(score: (Double)(score))
+                }
+            }*/
             .navigationDestination(for: Screen.self) { screen in
                 NavigationController.navigate(to: screen, with: navigationPath)
             }
@@ -80,6 +89,7 @@ struct LevelSelectionView: View {
         }
     }
 }
+
 
 struct CustomButton_Level: View {
     var lvNumber: Int

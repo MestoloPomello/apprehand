@@ -2,6 +2,7 @@ import SwiftUI
 import AVFoundation
 import CoreML
 import Vision
+import CoreImage
 
 // CameraView per gestire la cattura video
 struct CameraView: UIViewControllerRepresentable {
@@ -11,32 +12,57 @@ struct CameraView: UIViewControllerRepresentable {
         var request: VNCoreMLRequest
         
         init(parent: CameraView) {
-        //override init() {
             self.parent = parent
             
-            // Carica il modello CoreML
+            // Caricamento del modello CoreML
             guard let model = try? VNCoreMLModel(for: ASL_Classifier(configuration: MLModelConfiguration()).model) else {
-                fatalError("Unable to load model")
+                fatalError("Failed to load model")
             }
             self.model = model
-            self.request = VNCoreMLRequest(model: model) { _, _ in }
-            
-            super.init()
-            
-            // Crea una richiesta VNCoreMLRequest usando il modello
-            self.request = VNCoreMLRequest(model: model) { [weak self] request, error in
-                self?.handleRequest(request: request, error: error)
-            }
-            self.request.imageCropAndScaleOption = .scaleFill
+            let request = VNCoreMLRequest(model: model, completionHandler: { (request, error) in
+                if let error = error {
+                    print("Error during the request: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let results = request.results as? [VNClassificationObservation] else {
+                    print("No results found, or results are not of expected type.")
+                    return
+                }
+                
+                if results.isEmpty {
+                    print("No classification results were returned.")
+                } else {
+                    for result in results {
+                        print("Result: \(result.identifier) with confidence: \(result.confidence)")
+                    }
+                }
+                
+                /*if let bestResult = results.first {
+                    let predictedClass = bestResult.identifier
+                    let confidence = bestResult.confidence
+                    print("Predicted class: \(predictedClass) with confidence: \(confidence)")
+                    
+                    DispatchQueue.main.async {
+                        //self.parent.handlePrediction(prediction: predictedClass)
+                    }
+                } else {
+                    print("No classification results were returned.")
+                }*/
+            })
+            self.request = request
+            self.request.imageCropAndScaleOption = .centerCrop
         }
         
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer) // Conversione a CIImage
+            
+            let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
             do {
                 try handler.perform([self.request])
             } catch {
-                print("Failed to perform request: \(error)")
+                print("Error performing request: \(error)")
             }
         }
         
@@ -57,7 +83,7 @@ struct CameraView: UIViewControllerRepresentable {
         let captureSession = AVCaptureSession()
         captureSession.sessionPreset = .photo
         
-        guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+        guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
             return viewController
         }
         
