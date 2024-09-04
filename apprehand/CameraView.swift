@@ -38,39 +38,71 @@ struct CameraView: UIViewControllerRepresentable {
                     }
                 }
                 
-                /*if let bestResult = results.first {
+                if let bestResult = results.first {
                     let predictedClass = bestResult.identifier
                     let confidence = bestResult.confidence
                     print("Predicted class: \(predictedClass) with confidence: \(confidence)")
                     
                     DispatchQueue.main.async {
                         //self.parent.handlePrediction(prediction: predictedClass)
-                    }
+                    }   
                 } else {
                     print("No classification results were returned.")
-                }*/
+                }
             })
             self.request = request
             self.request.imageCropAndScaleOption = .centerCrop
         }
         
-        func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            let ciImage = CIImage(cvPixelBuffer: pixelBuffer) // Conversione a CIImage
+        // override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        //     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        //     let ciImage = CIImage(cvPixelBuffer: pixelBuffer) // Conversione a CIImage
             
-            let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
+        //     let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
+        //     do {
+        //         try handler.perform([self.request])
+        //     } catch {
+        //         print("Error performing request: \(error)")
+        //     }
+        // }
+        
+        override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+            
+            let exifOrientation = exifOrientationFromDeviceOrientation()
+            
+            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: [:])
             do {
-                try handler.perform([self.request])
+                try imageRequestHandler.perform([self.request])
             } catch {
-                print("Error performing request: \(error)")
+                print(error)
             }
         }
-        
+
         func handleRequest(request: VNRequest, error: Error?) {
             guard let results = request.results as? [VNClassificationObservation], let bestResult = results.first else { return }
             DispatchQueue.main.async {
                 self.parent.handlePrediction(prediction: bestResult.identifier)
             }
+        }
+
+        public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
+            let curDeviceOrientation = UIDevice.current.orientation
+            let exifOrientation: CGImagePropertyOrientation
+            
+            switch curDeviceOrientation {
+            case UIDeviceOrientation.portraitUpsideDown:  // Device oriented vertically, home button on the top
+                exifOrientation = .left
+            case UIDeviceOrientation.landscapeLeft:       // Device oriented horizontally, home button on the right
+                exifOrientation = .upMirrored
+            case UIDeviceOrientation.landscapeRight:      // Device oriented horizontally, home button on the left
+                exifOrientation = .down
+            case UIDeviceOrientation.portrait:            // Device oriented vertically, home button on the bottom
+                exifOrientation = .up
+            default:
+                exifOrientation = .up
+            }
+            return exifOrientation
         }
     }
     
