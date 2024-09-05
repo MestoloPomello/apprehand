@@ -1,11 +1,12 @@
 var FR_TRANSLATED_TEXT: [String: String] = [
-  "learn": "Impara",
-  "train": "Allenati",
-  "italian": "Italiano",
-  "english": "Inglese",
-  "french": "Francese",
-  "spanish": "Spagnolo",
-  "language": "Lingua",
-  "training_completed": "Allenamento\ncompletato",
-  "score": "Punteggio"
+  "learn": "Apprends",
+  "train": "Entraîne-toi",
+  "italian": "Italien",
+  "english": "Anglais",
+  "french": "Français",
+  "spanish": "Espagnol",
+  "language": "Langue",
+  "training_completed": "Entraînement\nterminé",
+  "score": "Score"
 ]
+

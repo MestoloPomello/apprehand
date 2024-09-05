@@ -10,6 +10,9 @@ struct CameraView: UIViewControllerRepresentable {
         var parent: CameraView
         var model: VNCoreMLModel
         var request: VNCoreMLRequest
+        var foundLetters: [String: [Float]] = [:]
+        // int 0 = occorrenze
+        // int 1 = max confidenza
         
         weak private var previewView: UIView!
         var bufferSize: CGSize = .zero
@@ -21,6 +24,7 @@ struct CameraView: UIViewControllerRepresentable {
         
         init(parent: CameraView) {
             self.parent = parent
+            self.foundLetters = [:]
             
             // Caricamento del modello CoreML
             guard let model = try? VNCoreMLModel(for: ASL_Classifier(configuration: MLModelConfiguration()).model) else {
@@ -33,36 +37,51 @@ struct CameraView: UIViewControllerRepresentable {
                     return
                 }
                 
-                print("request.results", request.results)
+                //print("request.results", request.results)
                 
                 guard let results = request.results as? [VNRecognizedObjectObservation], let bestResult = results.first else { return }
                 
-                print("Miglior risultato", bestResult.labels)
+                print("Miglior risultato", bestResult.labels[0].identifier)
                 
-                /*guard let results = request.results as? [VNClassificationObservation] else {
-                 print("No results found, or results are not of expected type.")
-                 return
-                 }*/
+                var isCalculating = true
                 
-                /*if results.isEmpty {
-                 print("No classification results were returned.")
-                 } else {
-                 for result in results {
-                 print("Result: \(result.identifier) with confidence: \(result.confidence)")
-                 }
-                 }
-                 
-                 if let bestResult = results.first {
-                 let predictedClass = bestResult.identifier
-                 let confidence = bestResult.confidence
-                 print("Predicted class: \(predictedClass) with confidence: \(confidence)")
-                 
-                 DispatchQueue.main.async {
-                 //self.parent.handlePrediction(prediction: predictedClass)
-                 }
-                 } else {
-                 print("No classification results were returned.")
-                 }*/
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { 
+                    isCalculating = false
+                }
+                
+                while isCalculating {
+                    let foundLetter = bestResult.labels[0].identifier
+                    let confidence = bestResult.labels[0].confidence
+                    
+                    if self.foundLetters[foundLetter] == nil {
+                        self.foundLetters[foundLetter] = [-1, -1]
+                    } else {
+                        self.foundLetters[foundLetter]?[0] += 1
+                    }
+                    
+                    if confidence > (self.foundLetters[foundLetter]?[1])! {
+                        self.foundLetters[foundLetter]?[1] = confidence
+                    }
+                }
+                
+                var maxOccurrences: Float = -1
+                var maxLetter: String = ""
+                var maxConfidence: Float = -1
+                
+                // {}[]
+                
+                for lettera in self.foundLetters {
+                    if (
+                        (lettera.value[0] == maxOccurrences && lettera.value[1] > maxConfidence) ||
+                        (lettera.value[0] > maxOccurrences)
+                    ) {
+                        maxLetter = lettera.key
+                        maxConfidence = lettera.value[1]
+                        maxOccurrences = lettera.value[0]
+                    }
+                }
+                
+                print("Lettera rilevata", maxLetter)
             })
             self.request = request
             self.request.imageCropAndScaleOption = .centerCrop
