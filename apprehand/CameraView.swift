@@ -91,7 +91,7 @@ struct CameraView: UIViewControllerRepresentable {
                     }
                 }
                 
-                print("Lettera rilevata", maxLetter)
+                //print("Lettera rilevata", maxLetter)
                 self.handlePrediction(prediction: maxLetter)
             })
             self.request = request

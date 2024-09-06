@@ -18,8 +18,8 @@ struct apprehandApp: App {
     
     var body: some Scene {
         WindowGroup {
-            //ContentView()
-            CameraOverlayView(lvNumber: 1, viewContext: "impara")
+            ContentView()
+            //CameraOverlayView(lvNumber: 1, viewContext: "impara")
         }
         .modelContainer(sharedModelContainer)
     }
