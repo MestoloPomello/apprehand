@@ -1,0 +1,13 @@
+  1. Muovi il cursore su questa linea.
+
+  2. Premi  v  e muovi il cursore fino alla linea numerata 5., qui sotto.
+     Nota che il testo viene evidenziato.
+
+  3. Batti il carattere  :  .  In fondo allo schermo apparirà :'<,'>  .
+
+  4. Batti  w TEST  , dove TEST è il nome di un file non ancora esistente.
+     Verifica che si veda  :'<,'>w TEST   prima di dare <INVIO>.
+
+  5. Vim scriverà nel file TEST le linee che hai selezionato.  Usa  :!dir
+     o  :!ls  per controllare che esiste.  Non cancellarlo ora!  Ti servirà
+     nella prossima lezione.

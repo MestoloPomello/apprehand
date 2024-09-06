@@ -29,6 +29,7 @@ struct CameraOverlayView: View {
                 .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
                     if let prediction = notification.object as? String {
                         handlePrediction(prediction: prediction)
+                        print("Ricevuto prediction da CameraOverlayView")
                     }
                 }
             

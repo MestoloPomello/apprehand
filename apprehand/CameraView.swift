@@ -82,28 +82,16 @@ struct CameraView: UIViewControllerRepresentable {
                 }
                 
                 print("Lettera rilevata", maxLetter)
+                
+                // Restituire lettera a CameraOverlayView
             })
             self.request = request
             self.request.imageCropAndScaleOption = .centerCrop
         }
         
-        // override func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        //     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        //     let ciImage = CIImage(cvPixelBuffer: pixelBuffer) // Conversione a CIImage
-        
-        //     let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
-        //     do {
-        //         try handler.perform([self.request])
-        //     } catch {
-        //         print("Error performing request: \(error)")
-        //     }
-        // }
-        
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            
             let exifOrientation = exifOrientationFromDeviceOrientation()
-            
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: [:])
             do {
                 try imageRequestHandler.perform([self.request])
