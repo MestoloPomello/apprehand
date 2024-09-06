@@ -6,10 +6,14 @@ import CoreImage
 
 // CameraView per gestire la cattura video
 struct CameraView: UIViewControllerRepresentable {
+    
+    @Binding var showResult: Bool
+    
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+        var isShowingResult: Bool = false
         var parent: CameraView
-        var model: VNCoreMLModel
-        var request: VNCoreMLRequest
+        var model: VNCoreMLModel?
+        var request: VNCoreMLRequest?
         var foundLetters: [String: [Float]] = [:]
         // int 0 = occorrenze
         // int 1 = max confidenza
@@ -26,12 +30,18 @@ struct CameraView: UIViewControllerRepresentable {
             self.parent = parent
             self.foundLetters = [:]
             
+            super.init()
+            
+            setupModelAndRequest()
+        }
+        
+        func setupModelAndRequest() {
             // Caricamento del modello CoreML
             guard let model = try? VNCoreMLModel(for: ASL_Classifier(configuration: MLModelConfiguration()).model) else {
                 fatalError("Failed to load model")
             }
             self.model = model
-            let request = VNCoreMLRequest(model: model, completionHandler: { (request, error) in
+            lazy var request = VNCoreMLRequest(model: model, completionHandler: { (request, error) in
                 if let error = error {
                     print("Error during the request: \(error.localizedDescription)")
                     return
@@ -41,11 +51,11 @@ struct CameraView: UIViewControllerRepresentable {
                 
                 guard let results = request.results as? [VNRecognizedObjectObservation], let bestResult = results.first else { return }
                 
-                print("Miglior risultato", bestResult.labels[0].identifier)
+                //print("Miglior risultato", bestResult.labels[0].identifier)
                 
                 var isCalculating = true
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { 
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
                     isCalculating = false
                 }
                 
@@ -82,30 +92,40 @@ struct CameraView: UIViewControllerRepresentable {
                 }
                 
                 print("Lettera rilevata", maxLetter)
-                
-                // Restituire lettera a CameraOverlayView
+                self.handlePrediction(prediction: maxLetter)
             })
             self.request = request
-            self.request.imageCropAndScaleOption = .centerCrop
+            self.request?.imageCropAndScaleOption = .centerCrop
+        }
+        
+        func handlePrediction(prediction: String) {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .predictionDidUpdate, object: prediction)
+            }
         }
         
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+            
+            if isShowingResult {
+                return
+            }
+            
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
             let exifOrientation = exifOrientationFromDeviceOrientation()
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: [:])
             do {
-                try imageRequestHandler.perform([self.request])
+                try imageRequestHandler.perform([self.request!])
             } catch {
                 print(error)
             }
         }
         
-        func handleRequest(request: VNRequest, error: Error?) {
+        /*func handleRequest(request: VNRequest, error: Error?) {
             guard let results = request.results as? [VNClassificationObservation], let bestResult = results.first else { return }
             DispatchQueue.main.async {
                 self.parent.handlePrediction(prediction: bestResult.identifier)
             }
-        }
+        }*/
         
         public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
             let curDeviceOrientation = UIDevice.current.orientation
@@ -226,10 +246,9 @@ struct CameraView: UIViewControllerRepresentable {
         return viewController
     }
     
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
-    
-    func handlePrediction(prediction: String) {
-        NotificationCenter.default.post(name: .predictionDidUpdate, object: prediction)
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        context.coordinator.isShowingResult = showResult
     }
+
 }
 

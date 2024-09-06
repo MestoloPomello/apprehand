@@ -21,7 +21,7 @@ struct CameraOverlayView: View {
         let letters = lettersLevels[lvNumber] ?? []
         
         ZStack {
-            CameraView()
+            CameraView(showResult: $showResult)
                 .edgesIgnoringSafeArea(.all)
                 .onAppear {
                     letter = letters[currentLetterIndex]
@@ -29,7 +29,7 @@ struct CameraOverlayView: View {
                 .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
                     if let prediction = notification.object as? String {
                         handlePrediction(prediction: prediction)
-                        print("Ricevuto prediction da CameraOverlayView")
+                        print("Ricevuto prediction da CameraOverlayView", prediction)
                     }
                 }
             
