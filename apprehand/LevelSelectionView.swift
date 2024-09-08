@@ -15,91 +15,131 @@ var starsForDiff = [
 struct LevelSelectionView: View {
     var viewContext: String
     @State private var numberOfLevels: Int = 8
+    @StateObject var navigationPath = Navigation()
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                ZStack {
+        NavigationStack(path: $navigationPath.path) {
+            ZStack {
+                Color.white.ignoresSafeArea()
+                
+                ScrollView {
                     VStack(spacing: 38) {
-                        ForEach(0..<(numberOfLevels / 2), id: \.self) { i in
+                        HStack {
+                            Button(action: {
+                                navigateToRoot()
+                            }) {
+                                Image(systemName: "chevron.backward")
+                                Text("Indietro")
+                            }
+                            .padding(.leading)
+                            Spacer()
+                        }
+                        
+                        ForEach(0..<((Int)(numberOfLevels) / (Int)(2)), id: \.self) { i in
+                            let lvNumber1: Int = (i * 2) + 1
+                            let lvNumber2: Int = (i * 2) + 2
                             HStack(spacing: 23) {
                                 CustomButton_Level(
-                                    lvNumber: (i * 2) + 1,
+                                    lvNumber: lvNumber1,
                                     context: viewContext,
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
-                                )
+                                ) {
+                                    navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
+                                }
                                 CustomButton_Level(
-                                    lvNumber: (i * 2) + 2,
+                                    lvNumber: lvNumber2,
                                     context: viewContext,
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
-                                )
+                                ) {
+                                    navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
+                                }
                             }
                         }
                     }
                     .padding(.top, 38)
                 }
             }
+            .navigationTitle("")
+            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
+            /*.navigationDestination(for: Screen.self) { screen in
+                switch screen {
+                case .cameraOverlayView(let level, let context):
+                    CameraOverlayView(lvNumber: level, viewContext: context)
+                case .contentView:
+                    ContentView()
+                case .levelSelectionView:
+                    LevelSelectionView(viewContext: "impara")
+                case .resultsView(let score):
+                    ResultsView(score: (Double)(score))
+                }
+            }*/
+            .navigationDestination(for: Screen.self) { screen in
+                NavigationController.navigate(to: screen, with: navigationPath)
+            }
+        }
+        .environmentObject(navigationPath)
+    }
+    
+    private func navigateToRoot() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = UIHostingController(rootView: ContentView())
+            window.makeKeyAndVisible()
         }
     }
 }
+
 
 struct CustomButton_Level: View {
     var lvNumber: Int
     var context: String
     var gradientColors: [Color]
+    //@StateObject var navigationPath = Navigation()
+    var action: () -> Void
     
     var body: some View {
-        Button(action: {
-            // Azione del pulsante
-        }) {
-            //NavigationLink(destination: CameraOverlayView(lvNumber: lvNumber, viewContext: context)) {
-                VStack {
-                    Text("Livello")
-                        .font(.system(size: 25))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .shadow(
-                            color: Color.black.opacity(0.2),
-                            radius: 4,
-                            x: 0,
-                            y: 4
-                        )
-                    Text("\(lvNumber)")
-                        .font(.system(size: 70))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.bottom, 20)
-                        .shadow(
-                            color: Color.black.opacity(0.2),
-                            radius: 4,
-                            x: 0,
-                            y: 4
-                        )
-                    HStack (spacing: 13) {
-                        ForEach(0..<(starsForDiff[lvNumber] ?? 0), id: \.self) { _ in
-                            Image("icons/star_yellow")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 27, height: 27)
-                        }
+        
+        Button(action: action) {
+            VStack {
+                Text("Livello")
+                    .font(.system(size: 25))
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .shadow(
+                        color: Color.black.opacity(0.2),
+                        radius: 4,
+                        x: 0,
+                        y: 4
+                    )
+                Text("\(lvNumber)")
+                    .font(.system(size: 70))
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.bottom, 20)
+                    .shadow(
+                        color: Color.black.opacity(0.2),
+                        radius: 4,
+                        x: 0,
+                        y: 4
+                    )
+                HStack (spacing: 13) {
+                    ForEach(0..<(starsForDiff[lvNumber] ?? 0), id: \.self) { _ in
+                        Image("star_yellow")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 27, height: 27)
                     }
-                    .padding(.top, 20)
                 }
-                .frame(width: 162, height: 250)
-                .background(
-                    LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .top, endPoint: .bottom)
-                )
-                .cornerRadius(15)
-                .shadow(color: gradientsForContext[context]!.ombra, radius: 0, x: 0, y: 5)
-            //}
+                .padding(.top, 20)
+            }
+            .frame(width: 162, height: 250)
+            .background(
+                LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .top, endPoint: .bottom)
+            )
+            .cornerRadius(15)
+            .shadow(color: gradientsForContext[context]!.ombra, radius: 0, x: 0, y: 5)
         }
         .buttonStyle(.plain)
     }
 }
-
-struct LevelSelectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        LevelSelectionView(viewContext: "impara")
-    }
-}
-

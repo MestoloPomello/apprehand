@@ -1,5 +1,37 @@
 import SwiftUI
 
+enum Screen: Hashable {
+    case resultsView(Int)
+    case levelSelectionView(String)
+    case contentView
+    case cameraOverlayView(Int, String)
+}
+
+class Navigation: ObservableObject {
+    @Published var path = [Screen]()
+}
+
+class NavigationController {
+    @ViewBuilder
+    static func navigate(to screen: Screen, with navigation: Navigation) -> some View {
+        switch screen {
+        case .contentView:
+            ContentView()
+        case .levelSelectionView("impara"):
+            //LevelSelectionView(navigationPath: navigation, viewContext: "impara")
+            LevelSelectionView(viewContext: "impara", navigationPath: navigation)
+        case .levelSelectionView("allenati"):
+            //LevelSelectionView(navigationPath: navigation,                viewContext: "allenati")
+            LevelSelectionView(viewContext: "allenati", navigationPath: navigation)
+        case .resultsView:
+            ResultsView(navigationPath: navigation)
+        default :
+            ContentView()
+}
+    }
+}
+
+
 extension Color {
     init(hex: Int, opacity: Double = 1) {
         self.init(
@@ -17,7 +49,7 @@ struct GradientData {
     var ombra: Color
 }
 
-var gradientsForContext: [String: GradientData] = [
+let gradientsForContext: [String: GradientData] = [
     "impara": GradientData(
         colori: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
         ombra: Color(hex: 0x4c3fe4)
@@ -32,7 +64,7 @@ var gradientsForContext: [String: GradientData] = [
     )
 ]
 
-var lettersLevels: [Int: [String]] = [
+let lettersLevels: [Int: [String]] = [
     1: ["a"],
     2: ["b", "c"],
     3: ["d", "e"],
@@ -42,3 +74,17 @@ var lettersLevels: [Int: [String]] = [
     7: ["q", "r", "t", "u"],
     8: ["v", "w", "x", "y"]
 ]
+
+var chosenLanguage: String = "italian"
+func getTranslatedText() -> [String: String] {
+    switch(chosenLanguage) {
+        case "english":
+            return EN_TRANSLATED_TEXT
+        case "french":
+            return FR_TRANSLATED_TEXT
+        case "spanish":
+            return ES_TRANSLATED_TEXT
+        default:
+            return IT_TRANSLATED_TEXT
+    }
+}

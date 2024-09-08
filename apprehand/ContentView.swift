@@ -1,27 +1,53 @@
 import SwiftUI
 
+//public var TRANSLATED_TEXT: [String: String] = [:]
+
 struct ContentView: View {
     @State private var showLanguageMenu = false
+    //@State private var navigationPath = NavigationPath()
+    @StateObject var navigationPath = Navigation()
     
+    public var TRANSLATED_TEXT = getTranslatedText()
+
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $navigationPath.path) {
             ZStack {
                 // Immagine di sfondo
                 Image("background")
-                    .resizable() // Rende l'immagine ridimensionabile
-                    .scaledToFill() // Rende l'immagine adatta a riempire l'intera area
-                    .ignoresSafeArea() // Fa sì che l'immagine riempia anche le aree sicure (come notch, bordi ecc.)
+                    .resizable()
+                    .scaledToFill()
+                    .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                 
                 // Pulsantiera
                 VStack(spacing: 20) {
                     // Prima riga di pulsanti
                     HStack(spacing: 20) {
-                        CustomButton_Impara(imageName: "book", title: "Impara", gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)])
-                        CustomButton_Allenati(imageName: "bench-barbel", title: "Allenati", gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] )
+                        CustomButton(
+                            imageName: "book",
+                            title: TRANSLATED_TEXT["learn"]!,
+                            gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
+                            shadowColor: Color(hex: 0x4c3fe4)
+                        ) {
+                            //LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
+                            //navigationPath = NavigationPath()
+                            //navigationPath.append(Screen.levelSelectionView("impara"))
+                            navigationPath.path.append(Screen.levelSelectionView("impara"))
+                        }
+                        CustomButton(
+                            imageName: "bench-barbel",
+                            title: TRANSLATED_TEXT["train"]!,
+                            gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)],
+                            shadowColor: Color(hex: 0x277099)
+                        ) {
+                            //LevelSelectionView(navigationPath: $navigationPath, viewContext: "allenati")
+                            //navigationPath = NavigationPath()
+                            //navigationPath.append(Screen.levelSelectionView("allenati"))
+                            navigationPath.path.append(Screen.levelSelectionView("allenati"))
+                        }
                     }
                     // Seconda riga di pulsanti
-                    CustomButton_Lingua(imageName: "languages", title: "Lingua", gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
-                    .frame(width: 200, height: 100) // Dimensioni personalizzate per pulsante più grande
+                    CustomButton_Lingua(imageName: "languages", title: TRANSLATED_TEXT["language"]!, gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
+                        .frame(width: 200, height: 100) // Dimensioni personalizzate per pulsante più grande
                 }
                 .padding(.top, 250)
                 
@@ -49,17 +75,23 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
+            .navigationDestination(for: Screen.self) { screen in
+                NavigationController.navigate(to: screen, with: navigationPath)
+            }
         }
+        .environmentObject(navigationPath)
     }
 }
 
-struct CustomButton_Impara: View {
+struct CustomButton: View {
     var imageName: String
     var title: String
     var gradientColors: [Color]
+    var shadowColor: Color
+    var action: () -> Void
     
     var body: some View {
-        NavigationLink(destination: LevelSelectionView(viewContext: "impara")) {
+        Button(action: action) {
             VStack {
                 Image(imageName)
                     .resizable()
@@ -83,85 +115,7 @@ struct CustomButton_Impara: View {
                 LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .top, endPoint: .bottom)
             )
             .cornerRadius(15)
-            .shadow(color: Color(hex: 0x4c3fe4), radius: 0, x: 0, y: 5)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-struct LanguageMenu: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            LanguageMenuButton(flagImage: "icons/flags/italy", language: "Italiano")
-            LanguageMenuButton(flagImage: "icons/flags/uk", language: "Inglese")
-            LanguageMenuButton(flagImage: "icons/flags/france", language: "Francese")
-            LanguageMenuButton(flagImage: "icons/flags/spain", language: "Spagnolo")
-        }
-        .padding(20)
-    }
-}
-
-struct LanguageMenuButton: View {
-    var flagImage: String
-    var language: String
-    
-    var body: some View {
-        HStack(spacing: 30) {
-            Image(flagImage)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 65, height: 65)
-            Text(language)
-                .font(.system(size: 25))
-                .fontWeight(.bold)
-                .shadow(
-                    color: Color.black.opacity(0.2),
-                    radius: 4,
-                    x: 0,
-                    y: 4
-                )
-            Spacer()
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 5)
-    }
-}
-
-struct CustomButton_Allenati: View {
-    var imageName: String
-    var title: String
-    var gradientColors: [Color]
-    
-    var body: some View {
-        NavigationLink(destination: LevelSelectionView(viewContext: "allenati")) {
-            VStack {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .padding(.top, 20)
-                Text(title)
-                    .font(.system(size: 25))
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.bottom, 20)
-                    .shadow(
-                        color: Color.black.opacity(0.2),
-                        radius: 4,
-                        x: 0,
-                        y: 4
-                    )
-            }
-            .frame(width: 162, height: 250)
-            .background(
-                LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .top, endPoint: .bottom)
-            )
-            
-            .cornerRadius(15)
-            .shadow(color: Color(hex: 0x277099), radius: 0, x: 0, y: 5)
-            
+            .shadow(color: shadowColor, radius: 0, x: 0, y: 5)
         }
         .buttonStyle(.plain)
     }
@@ -184,7 +138,6 @@ struct CustomButton_Lingua: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 65, height: 65)
-                //.padding(.horizontal, -10)
                 Text(title)
                     .font(.system(size: 25))
                     .fontWeight(.bold)
@@ -206,6 +159,56 @@ struct CustomButton_Lingua: View {
         .buttonStyle(.plain)
     }
 }
+
+struct LanguageMenu: View {
+    public var TRANSLATED_TEXT = getTranslatedText()
+    var body: some View {
+        VStack(spacing: 20) {
+            LanguageMenuButton(flagImage: "italy", language: "italian")
+            LanguageMenuButton(flagImage: "uk", language: "english")
+            LanguageMenuButton(flagImage: "france", language: "french")
+            LanguageMenuButton(flagImage: "spain", language: "spanish")
+        }
+        .padding(20)
+    }
+}
+
+struct LanguageMenuButton: View {
+    var flagImage: String
+    var language: String
+    
+    var TRANSLATED_TEXT = getTranslatedText()
+    
+    var body: some View {
+        Button(action: {
+            chosenLanguage = language
+            // TODO: spostamento chosenlanguage in file
+        }) {
+            HStack(spacing: 30) {
+                Image(flagImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 65, height: 65)
+                Text(TRANSLATED_TEXT[language]!)
+                    .font(.system(size: 25))
+                    .foregroundColor(.black)
+                    .fontWeight(.bold)
+                    .shadow(
+                        color: Color.black.opacity(0.2),
+                        radius: 4,
+                        x: 0,
+                        y: 4
+                    )
+                Spacer()
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(10)
+            .shadow(radius: 5)
+        }
+    }
+}
+
 
 struct Menu_ViewPreviews: PreviewProvider {
     static var previews: some View {
