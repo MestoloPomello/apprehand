@@ -44,14 +44,16 @@ struct LevelSelectionView: View {
                                     context: viewContext,
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
                                 ) {
-                                    navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
+                                    //navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
+                                    navigateToCamera(lvNumber: lvNumber1)
                                 }
                                 CustomButton_Level(
                                     lvNumber: lvNumber2,
                                     context: viewContext,
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
                                 ) {
-                                    navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
+                                    //navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
+                                    navigateToCamera(lvNumber: lvNumber2)
                                 }
                             }
                         }
@@ -63,17 +65,17 @@ struct LevelSelectionView: View {
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
             /*.navigationDestination(for: Screen.self) { screen in
-                switch screen {
-                case .cameraOverlayView(let level, let context):
-                    CameraOverlayView(lvNumber: level, viewContext: context)
-                case .contentView:
-                    ContentView()
-                case .levelSelectionView:
-                    LevelSelectionView(viewContext: "impara")
-                case .resultsView(let score):
-                    ResultsView(score: (Double)(score))
-                }
-            }*/
+             switch screen {
+             case .cameraOverlayView(let level, let context):
+             CameraOverlayView(lvNumber: level, viewContext: context)
+             case .contentView:
+             ContentView()
+             case .levelSelectionView:
+             LevelSelectionView(viewContext: "impara")
+             case .resultsView(let score):
+             ResultsView(score: (Double)(score))
+             }
+             }*/
             .navigationDestination(for: Screen.self) { screen in
                 NavigationController.navigate(to: screen, with: navigationPath)
             }
@@ -85,6 +87,14 @@ struct LevelSelectionView: View {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.rootViewController = UIHostingController(rootView: ContentView())
+            window.makeKeyAndVisible()
+        }
+    }
+    
+    private func navigateToCamera(lvNumber: Int) {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = UIHostingController(rootView: CameraOverlayView(lvNumber: lvNumber, viewContext: viewContext))
             window.makeKeyAndVisible()
         }
     }

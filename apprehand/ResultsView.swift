@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ResultsView: View {
-    @ObservedObject var navigationPath: Navigation
+    @StateObject var navigationPath = Navigation()
     @State var score: Double = 70.0
     
     let gradientData = gradientsForContext["allenati"]!
