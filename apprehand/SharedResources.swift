@@ -74,9 +74,9 @@ let lettersLevels: [Int: [String]] = [
     8: ["v", "w", "x", "y"]
 ]
 
-var chosenLanguage: String = "italian"
-func getTranslatedText() -> [String: String] {
-    switch(chosenLanguage) {
+//let defaults = UserDefaults.standard
+/*func getTranslatedText() -> [String: String] {
+    switch(defaults.string(forKey: "language")) {
         case "english":
             return EN_TRANSLATED_TEXT
         case "french":
@@ -85,6 +85,19 @@ func getTranslatedText() -> [String: String] {
             return ES_TRANSLATED_TEXT
         default:
             return IT_TRANSLATED_TEXT
+    }
+}*/
+
+func getTranslatedString(key: String) -> String {
+    switch(UserDefaults.standard.string(forKey: "language")) {
+        case "english":
+            return EN_TRANSLATED_TEXT[key]!
+        case "french":
+            return FR_TRANSLATED_TEXT[key]!
+        case "spanish":
+            return ES_TRANSLATED_TEXT[key]!
+        default:
+            return IT_TRANSLATED_TEXT[key]!
     }
 }
 

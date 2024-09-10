@@ -112,7 +112,7 @@ struct CustomButton_Level: View {
         
         Button(action: action) {
             VStack {
-                Text("Livello")
+                Text(getTranslatedString(key: "level"))
                     .font(.system(size: 25))
                     .fontWeight(.bold)
                     .foregroundColor(.white)

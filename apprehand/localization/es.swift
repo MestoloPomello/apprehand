@@ -7,5 +7,6 @@ var ES_TRANSLATED_TEXT: [String: String] = [
   "spanish": "Espanol",
   "language": "Lengua",
   "training_completed": "Entrenamiento\ncompletado",
-  "score": "Puntuaciòn"
+  "score": "Puntuaciòn",
+  "level": "Nivel"
 ]

@@ -7,8 +7,8 @@ struct ContentView: View {
     //@State private var navigationPath = NavigationPath()
     @StateObject var navigationPath = Navigation()
     
-    public var TRANSLATED_TEXT = getTranslatedText()
-
+    //@State private var TRANSLATED_TEXT = getTranslatedText()
+    
     var body: some View {
         NavigationStack(path: $navigationPath.path) {
             ZStack {
@@ -24,7 +24,7 @@ struct ContentView: View {
                     HStack(spacing: 20) {
                         CustomButton(
                             imageName: "book",
-                            title: TRANSLATED_TEXT["learn"]!,
+                            title: getTranslatedString(key: "learn"),
                             gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
                             shadowColor: Color(hex: 0x4c3fe4)
                         ) {
@@ -35,7 +35,7 @@ struct ContentView: View {
                         }
                         CustomButton(
                             imageName: "bench-barbel",
-                            title: TRANSLATED_TEXT["train"]!,
+                            title: getTranslatedString(key: "train"),
                             gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)],
                             shadowColor: Color(hex: 0x277099)
                         ) {
@@ -46,7 +46,12 @@ struct ContentView: View {
                         }
                     }
                     // Seconda riga di pulsanti
-                    CustomButton_Lingua(imageName: "languages", title: TRANSLATED_TEXT["language"]!, gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)], showLanguageMenu: $showLanguageMenu)
+                    CustomButton_Lingua(
+                        imageName: "languages",
+                        title: getTranslatedString(key: "language"),
+                        gradientColors: [Color(hex: 0xecd7fc), Color(hex: 0xc285f2)],
+                        showLanguageMenu: $showLanguageMenu
+                    )
                         .frame(width: 200, height: 100) // Dimensioni personalizzate per pulsante più grande
                 }
                 .padding(.top, 250)
@@ -161,13 +166,24 @@ struct CustomButton_Lingua: View {
 }
 
 struct LanguageMenu: View {
-    public var TRANSLATED_TEXT = getTranslatedText()
     var body: some View {
         VStack(spacing: 20) {
-            LanguageMenuButton(flagImage: "italy", language: "italian")
-            LanguageMenuButton(flagImage: "uk", language: "english")
-            LanguageMenuButton(flagImage: "france", language: "french")
-            LanguageMenuButton(flagImage: "spain", language: "spanish")
+            LanguageMenuButton(
+                flagImage: "italy",
+                language: "italian"
+            )
+            LanguageMenuButton(
+                flagImage: "uk",
+                language: "english"
+            )
+            LanguageMenuButton(
+                flagImage: "france",
+                language: "french"
+            )
+            LanguageMenuButton(
+                flagImage: "spain",
+                language: "spanish"
+            )
         }
         .padding(20)
     }
@@ -177,19 +193,18 @@ struct LanguageMenuButton: View {
     var flagImage: String
     var language: String
     
-    var TRANSLATED_TEXT = getTranslatedText()
+    let defaults = UserDefaults.standard
     
     var body: some View {
         Button(action: {
-            chosenLanguage = language
-            // TODO: spostamento chosenlanguage in file
+            defaults.set(language, forKey: "language")
         }) {
             HStack(spacing: 30) {
                 Image(flagImage)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 65, height: 65)
-                Text(TRANSLATED_TEXT[language]!)
+                Text(getTranslatedString(key: language))
                     .font(.system(size: 25))
                     .foregroundColor(.black)
                     .fontWeight(.bold)

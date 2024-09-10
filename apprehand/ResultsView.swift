@@ -6,8 +6,6 @@ struct ResultsView: View {
     
     let gradientData = gradientsForContext["allenati"]!
 
-    var TRANSLATED_TEXT: [String: String] = getTranslatedText()    
-
     var body: some View {
         ZStack {
             Image("background_plain")
@@ -16,7 +14,7 @@ struct ResultsView: View {
                 .ignoresSafeArea()
             
             VStack {
-                Text(TRANSLATED_TEXT["training_completed"]!)
+                Text(getTranslatedString(key: "training_completed"))
                     .multilineTextAlignment(.center)
                     .padding(.top, 102)
                     .font(.system(size: 40))
@@ -45,7 +43,7 @@ struct ResultsView: View {
                         .rotationEffect(Angle(degrees: 270.0))
                     
                     VStack {
-                        Text("Punteggio")
+                        Text(getTranslatedString(key: "score"))
                         .font(.system(size: 20))
                         .fontWeight(.bold)
                         .foregroundColor(.black)
