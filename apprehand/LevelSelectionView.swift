@@ -17,6 +17,8 @@ struct LevelSelectionView: View {
     @State private var numberOfLevels: Int = 8
     @StateObject var navigationPath = Navigation()
     
+    var progress = UserDefaults.standards.string(forKey: "progress_\(viewContext)")
+
     var body: some View {
         NavigationStack(path: $navigationPath.path) {
             ZStack {

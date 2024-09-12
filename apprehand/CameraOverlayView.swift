@@ -124,6 +124,7 @@ struct CameraOverlayView: View {
         } else {
             // Calcola il punteggio finale e naviga alla ResultsView
             let score = Double(rightGuesses) / Double(lettersLevels[lvNumber]!.count) * 100
+            UserDefaults.standard.set(lvNumber, forKey: "\(viewContext)_progress")
             navigationPath.path.append(.resultsView(Int(score)))
         }
     }
