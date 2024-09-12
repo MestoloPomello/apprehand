@@ -45,8 +45,7 @@ struct LevelSelectionView: View {
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
                                 ) {
                                     //navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
-                                    // navigateToCamera(lvNumber: lvNumber1)
-                                    CameraOverlayView(lvNumber: lvNumber1, viewContext: viewContext)
+                                    navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber1, viewContext: viewContext))
                                 }
                                 CustomButton_Level(
                                     lvNumber: lvNumber2,
@@ -54,8 +53,7 @@ struct LevelSelectionView: View {
                                     gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
                                 ) {
                                     //navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
-                                    // navigateToCamera(lvNumber: lvNumber2)
-                                    CameraOverlayView(lvNumber: lvNumber2, viewContext: viewContext)
+                                    navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber2, viewContext: viewContext))
                                 }
                             }
                         }
@@ -84,30 +82,6 @@ struct LevelSelectionView: View {
         }
         .environmentObject(navigationPath)
     }
-
-    private func navigateToView(rootView: View) {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController = UIHostingController(rootView: rootView)
-            window.makeKeyAndVisible()
-        }
-    }
-    
-    /* private func navigateToRoot() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController = UIHostingController(rootView: ContentView())
-            window.makeKeyAndVisible()
-        }
-    } */
-    
-    //private func navigateToCamera(lvNumber: Int) {
-    //    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-    //       let window = windowScene.windows.first {
-    //        window.rootViewController = UIHostingController(rootView: CameraOverlayView(lvNumber: lvNumber, viewContext: viewContext))
-    //        window.makeKeyAndVisible()
-    //    }
-    //}
 }
 
 

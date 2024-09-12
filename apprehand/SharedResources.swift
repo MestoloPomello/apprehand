@@ -125,3 +125,12 @@ extension View {
         overlay(EdgeBorder(width: width, edges: edges).foregroundColor(color))
     }
 }
+
+
+func navigateToView(rootView: some View) {
+    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+       let window = windowScene.windows.first {
+        window.rootViewController = UIHostingController(rootView: rootView)
+        window.makeKeyAndVisible()
+    }
+}

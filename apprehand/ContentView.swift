@@ -28,9 +28,6 @@ struct ContentView: View {
                             gradientColors: [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
                             shadowColor: Color(hex: 0x4c3fe4)
                         ) {
-                            //LevelSelectionView(navigationPath: $navigationPath, viewContext: "impara")
-                            //navigationPath = NavigationPath()
-                            //navigationPath.append(Screen.levelSelectionView("impara"))
                             navigationPath.path.append(Screen.levelSelectionView("impara"))
                         }
                         CustomButton(
@@ -39,9 +36,6 @@ struct ContentView: View {
                             gradientColors:[Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)],
                             shadowColor: Color(hex: 0x277099)
                         ) {
-                            //LevelSelectionView(navigationPath: $navigationPath, viewContext: "allenati")
-                            //navigationPath = NavigationPath()
-                            //navigationPath.append(Screen.levelSelectionView("allenati"))
                             navigationPath.path.append(Screen.levelSelectionView("allenati"))
                         }
                     }
