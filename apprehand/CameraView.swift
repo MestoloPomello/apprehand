@@ -47,7 +47,9 @@ struct CameraView: UIViewControllerRepresentable {
                     return
                 }
                 
-                //print("request.results", request.results)
+                if self.isShowingResult {
+                    return
+                }
                 
                 guard let results = request.results as? [VNRecognizedObjectObservation], let bestResult = results.first else { return }
                 
@@ -90,6 +92,8 @@ struct CameraView: UIViewControllerRepresentable {
                         maxOccurrences = lettera.value[0]
                     }
                 }
+                
+                self.foundLetters = [:]
                 
                 //print("Lettera rilevata", maxLetter)
                 self.handlePrediction(prediction: maxLetter)

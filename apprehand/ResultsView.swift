@@ -40,7 +40,7 @@ struct ResultsView: View {
                         .trim(from: 0.0, to: CGFloat(min(self.score / 100, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
                         .foregroundColor(.green)
-                        .rotationEffect(Angle(degrees: 270.0))
+                        .rotationEffect(Angle(degrees: 0.0))
                     
                     VStack {
                         Text(getTranslatedString(key: "score"))
@@ -59,17 +59,29 @@ struct ResultsView: View {
                     navigateToRoot()
                 }) {
                     Text("Menu")
-                        .font(.title) // Modifica la dimensione del testo
+                        .font(.system(size: 25))
+                        .fontWeight(.bold)
                         .padding() // Spazio interno del bottone
                         .frame(width: 182, height: 88) // Dimensione del bottone
                         //.background(LinearGradient(gradient: Gradient(colors: gradientData.colori), startPoint: .top, endPoint: .bottom))
                         .background(LinearGradient(gradient: Gradient(colors: gradientsForContext["allenati"]?.colori ?? [Color.white, Color.gray]), startPoint: .top, endPoint: .bottom))
-                        .shadow(color: gradientsForContext["allenati"]!.ombra, radius: 0, x: 0, y: 5)
+                        .shadow(
+                            color: Color.black.opacity(0.2),
+                            radius: 4,
+                            x: 0,
+                            y: 4
+                        )
                         .foregroundColor(.white)
                         .cornerRadius(15)
                         
                 }
                 .padding(.top, 70)
+                .shadow(
+                    color: gradientsForContext["allenati"]!.ombra,
+                    radius: 0,
+                    x: 0,
+                    y: 5
+                )
                 
                 Spacer()
             }

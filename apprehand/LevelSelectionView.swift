@@ -16,10 +16,10 @@ struct LevelSelectionView: View {
     var viewContext: String
     @State private var numberOfLevels: Int = 8
     @StateObject var navigationPath = Navigation()
-    
-    var progress = UserDefaults.standards.integer(forKey: "progress_\(viewContext)") ?? 5
 
     var body: some View {
+        let progress: Int = UserDefaults.standard.integer(forKey: "progress_\(viewContext)")
+        
         NavigationStack(path: $navigationPath.path) {
             ZStack {
                 Color.white.ignoresSafeArea()
@@ -44,10 +44,8 @@ struct LevelSelectionView: View {
                                 CustomButton_Level(
                                     lvNumber: lvNumber1,
                                     context: viewContext,
-                                    // gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
-                                    gradientColors: lvNumber1 <= (progress + 1)
-                                        ? gradientsForContext[viewContext]?.colori
-                                        : [Color.white, Color.gray]
+                                    gradientColors: (lvNumber1 <= (progress + 1)) ? gradientsForContext[viewContext]!.colori : gradientsForContext["locked"]!.colori,
+                                    progress: progress
                                 ) {
                                     if lvNumber1 <= (progress + 1) {
                                         navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber1, viewContext: viewContext))
@@ -56,10 +54,10 @@ struct LevelSelectionView: View {
                                 CustomButton_Level(
                                     lvNumber: lvNumber2,
                                     context: viewContext,
-                                    // gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
-                                    gradientColors: lvNumber2 <= (progress + 1)
-                                        ? gradientsForContext[viewContext]?.colori
-                                        : [Color.white, Color.gray]
+                                    gradientColors: (lvNumber2 <= (progress + 1))
+                                        ? gradientsForContext[viewContext]!.colori
+                                        : gradientsForContext["locked"]!.colori,
+                                    progress: progress
                                 ) {
                                     if lvNumber2 <= (progress + 1) {
                                         navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber2, viewContext: viewContext))
@@ -74,18 +72,6 @@ struct LevelSelectionView: View {
             .navigationTitle("")
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
-            /*.navigationDestination(for: Screen.self) { screen in
-             switch screen {
-             case .cameraOverlayView(let level, let context):
-             CameraOverlayView(lvNumber: level, viewContext: context)
-             case .contentView:
-             ContentView()
-             case .levelSelectionView:
-             LevelSelectionView(viewContext: "impara")
-             case .resultsView(let score):
-             ResultsView(score: (Double)(score))
-             }
-             }*/
             .navigationDestination(for: Screen.self) { screen in
                 NavigationController.navigate(to: screen, with: navigationPath)
             }
@@ -99,7 +85,7 @@ struct CustomButton_Level: View {
     var lvNumber: Int
     var context: String
     var gradientColors: [Color]
-    //@StateObject var navigationPath = Navigation()
+    var progress: Int
     var action: () -> Void
     
     var body: some View {
@@ -149,7 +135,14 @@ struct CustomButton_Level: View {
                 LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .top, endPoint: .bottom)
             )
             .cornerRadius(15)
-            .shadow(color: gradientsForContext[context]!.ombra, radius: 0, x: 0, y: 5)
+            .shadow(
+                color: (lvNumber <= (progress + 1))
+                    ? gradientsForContext[context]!.ombra
+                    : gradientsForContext["locked"]!.ombra,
+                radius: 0,
+                x: 0,
+                y: 5
+            )
         }
         .buttonStyle(.plain)
     }

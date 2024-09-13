@@ -19,98 +19,108 @@ struct CameraOverlayView: View {
     var body: some View {
         let letters = lettersLevels[lvNumber] ?? []
         NavigationStack(path: $navigationPath.path) {
-            ZStack {
-                CameraView(showResult: $showResult)
-                //.edgesIgnoringSafeArea(.all)
-                    .onAppear {
-                        letter = letters[currentLetterIndex]
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
-                        if let prediction = notification.object as? String {
-                            handlePrediction(prediction: prediction)
-                            print("Ricevuto prediction da CameraOverlayView", prediction)
+            //HStack (alignment: .center) {
+                ZStack {
+                    CameraView(showResult: $showResult)
+                    //.edgesIgnoringSafeArea(.all)
+                        .onAppear {
+                            letter = letters[currentLetterIndex]
                         }
-                    }
-                
-                if showResult {
-                    Rectangle()
-                        .fill(Color(hex: 0x000000, opacity: 0.3))
-                        .edgesIgnoringSafeArea(.all)
-                }
-                
-                VStack {
-                    HStack {
-                        Button(action: {
-                            navigateToView(rootView: LevelSelectionView(viewContext: viewContext))
-                        }) {
-                            Image(systemName: "chevron.backward")
-                            Text("Indietro")
-                        }
-                        .padding(.leading)
-                        Spacer()
-                    }
-                    
-                    // Mostra la lettera corrente da fare
-                    if !showResult {
-                        LetterDisplayView(letter: letter, viewContext: viewContext)
-                    }
-                    
-                    if showResult {
-                        Spacer()
-                        VStack(alignment: .center, spacing: 34) {
-                            Image(isCorrect ? "cerchio_giusto_\(viewContext)" : "cerchio_sbagliato_\(viewContext)")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 206, height: 206)
-                            //.foregroundColor(isCorrect ? .green : .red)
-                            
-                            CustomButton_CameraOverlay(
-                                title: "Prossima",
-                                gradientColors: viewContext == "allenati" ? [Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] : [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
-                                shadowColor: viewContext == "allenati" ? Color(hex: 0x277099) : Color(hex: 0x4c3fe4),
-                                action: nextLetter
-                            )
-                            
-                            if viewContext == "impara" && !isCorrect {
-                                Divider()
-                                
-                                CustomButton_CameraOverlay(
-                                    title: "Riprova",
-                                    gradientColors: [Color(hex: 0xebcdec), Color(hex: 0xba78c0)],
-                                    shadowColor: Color(hex: 0x754376),
-                                    action: { showResult = false }
-                                )
+                        .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
+                            if let prediction = notification.object as? String {
+                                handlePrediction(prediction: prediction)
+                                print("Ricevuto prediction da CameraOverlayView", prediction)
                             }
                         }
-                        .frame(width: 344, height: 558)
-                        .background(Color.white)
-                        .cornerRadius(15)
-                        .shadow(
-                            color: Color.black.opacity(0.5),
-                            radius: 4,
-                            x: 0,
-                            y: 4
-                        )
-                        .padding(34)
-                        
-                        Spacer()
+                    
+                    if showResult {
+                        Rectangle()
+                            .fill(Color(hex: 0x000000, opacity: 0.3))
+                            .edgesIgnoringSafeArea(.all)
                     }
+                    
+                    VStack {
+                        HStack {
+                            Button(action: {
+                                navigateToView(rootView: LevelSelectionView(viewContext: viewContext))
+                            }) {
+                                Image(systemName: "chevron.backward")
+                                Text("Indietro")
+                            }
+                            .padding(.leading)
+                            Spacer()
+                        }.padding(.top, 10)
+                        
+                        // Mostra la lettera corrente da fare
+                        if !showResult {
+                            LetterDisplayView(letter: letter, viewContext: viewContext)
+                        }
+                        
+                        if showResult {
+                            Spacer()
+                            VStack(alignment: .center, spacing: 34) {
+                                Image(isCorrect ? "cerchio_giusto_\(viewContext)" : "cerchio_sbagliato_\(viewContext)")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 206, height: 206)
+                                //.foregroundColor(isCorrect ? .green : .red)
+                                
+                                if viewContext == "allenati" || isCorrect {
+                                    Spacer().frame(height: 35)
+                                }
+                                
+                                CustomButton_CameraOverlay(
+                                    title: (currentLetterIndex + 1 < lettersLevels[lvNumber]!.count)
+                                        ? "Prossima"
+                                        : "Fine",
+                                    gradientColors: viewContext == "allenati" ? [Color(hex: 0xbae4fc), Color(hex: 0x3fabd9)] : [Color(hex: 0xd7dbfc), Color(hex: 0x8785f2)],
+                                    shadowColor: viewContext == "allenati" ? Color(hex: 0x277099) : Color(hex: 0x4c3fe4),
+                                    action: nextLetter
+                                )
+                                
+                                if viewContext == "impara" && !isCorrect {
+                                    Divider()
+                                        .frame(width: 250)
+                                    
+                                    CustomButton_CameraOverlay(
+                                        title: "Riprova",
+                                        gradientColors: [Color(hex: 0xebcdec), Color(hex: 0xba78c0)],
+                                        shadowColor: Color(hex: 0x754376),
+                                        action: { showResult = false }
+                                    )
+                                }
+                            }
+                            .frame(width: 344, height: 558)
+                            .background(Color.white)
+                            .cornerRadius(15)
+                            .shadow(
+                                color: Color.black.opacity(0.5),
+                                radius: 4,
+                                x: 0,
+                                y: 4
+                            )
+                            //.padding(34)
+                            
+                            Spacer()
+                        }
+                    }//.padding(.trailing, -34)
                 }
-                .padding(10)
-            }
-            .navigationDestination(for: Screen.self) { screen in
-                NavigationController.navigate(to: screen, with: navigationPath)
-            }
+                .navigationDestination(for: Screen.self) { screen in
+                    NavigationController.navigate(to: screen, with: navigationPath)
+                }
+            //}
         }
         //.environmentObject(navigationPath)
     }
     
     func handlePrediction(prediction: String) {
-        if prediction == letter {
+        //if prediction == letter {
+        if currentLetterIndex % 2 == 0 {
             isCorrect = true
             rightGuesses += 1
             showResult = true
-        } else if prediction != "" {
+        //} else if prediction != "" {
+        } else {
             isCorrect = false
             showResult = true
         }
@@ -122,10 +132,18 @@ struct CameraOverlayView: View {
             currentLetterIndex += 1
             letter = lettersLevels[lvNumber]![currentLetterIndex]
         } else {
-            // Calcola il punteggio finale e naviga alla ResultsView
-            let score = Double(rightGuesses) / Double(lettersLevels[lvNumber]!.count) * 100
-            UserDefaults.standard.set(lvNumber, forKey: "progress_\(viewContext)")
-            navigationPath.path.append(.resultsView(Int(score)))
+            if viewContext == "allenati" {
+                // Calcola il punteggio finale e naviga alla ResultsView
+                let score = Double(rightGuesses) / Double(lettersLevels[lvNumber]!.count) * 100
+                
+                if rightGuesses == lettersLevels[lvNumber]!.count {
+                    UserDefaults.standard.set(lvNumber, forKey: "progress_\(viewContext)")
+                }
+                
+                navigateToView(rootView: ResultsView(score: score))
+            } else {
+                navigateToView(rootView: LevelSelectionView(viewContext: viewContext, navigationPath: navigationPath))
+            }
         }
     }
 }
