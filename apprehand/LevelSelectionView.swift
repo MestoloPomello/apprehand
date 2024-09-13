@@ -17,7 +17,7 @@ struct LevelSelectionView: View {
     @State private var numberOfLevels: Int = 8
     @StateObject var navigationPath = Navigation()
     
-    var progress = UserDefaults.standards.string(forKey: "progress_\(viewContext)")
+    var progress = UserDefaults.standards.integer(forKey: "progress_\(viewContext)") ?? 5
 
     var body: some View {
         NavigationStack(path: $navigationPath.path) {
@@ -44,18 +44,26 @@ struct LevelSelectionView: View {
                                 CustomButton_Level(
                                     lvNumber: lvNumber1,
                                     context: viewContext,
-                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    // gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    gradientColors: lvNumber1 <= (progress + 1)
+                                        ? gradientsForContext[viewContext]?.colori
+                                        : [Color.white, Color.gray]
                                 ) {
-                                    //navigationPath.path.append(Screen.cameraOverlayView(lvNumber1, viewContext))
-                                    navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber1, viewContext: viewContext))
+                                    if lvNumber1 <= (progress + 1) {
+                                        navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber1, viewContext: viewContext))
+                                    } 
                                 }
                                 CustomButton_Level(
                                     lvNumber: lvNumber2,
                                     context: viewContext,
-                                    gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    // gradientColors: gradientsForContext[viewContext]?.colori ?? [Color.white, Color.gray]
+                                    gradientColors: lvNumber2 <= (progress + 1)
+                                        ? gradientsForContext[viewContext]?.colori
+                                        : [Color.white, Color.gray]
                                 ) {
-                                    //navigationPath.path.append(Screen.cameraOverlayView(lvNumber2, viewContext))
-                                    navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber2, viewContext: viewContext))
+                                    if lvNumber2 <= (progress + 1) {
+                                        navigateToView(rootView: CameraOverlayView(lvNumber: lvNumber2, viewContext: viewContext))
+                                    }
                                 }
                             }
                         }
@@ -121,10 +129,17 @@ struct CustomButton_Level: View {
                     )
                 HStack (spacing: 13) {
                     ForEach(0..<(starsForDiff[lvNumber] ?? 0), id: \.self) { _ in
-                        Image("star_yellow")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 27, height: 27)
+                        if lvNumber <= (progress + 1) {
+                            Image("star_yellow")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 27, height: 27)
+                        } else {
+                            Image("star_black")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 27, height: 27)
+                        } 
                     }
                 }
                 .padding(.top, 20)
