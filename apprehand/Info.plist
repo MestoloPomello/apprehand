@@ -4,5 +4,7 @@
 <dict>
 	<key>NSCameraUsageDescription</key>
 	<string>The app will use the camera to recognize the hand motion.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Salvare immagine</string>
 </dict>
 </plist>

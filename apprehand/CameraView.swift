@@ -3,6 +3,7 @@ import AVFoundation
 import CoreML
 import Vision
 import CoreImage
+import Photos
 
 // CameraView per gestire la cattura video
 struct CameraView: UIViewControllerRepresentable {
@@ -37,7 +38,7 @@ struct CameraView: UIViewControllerRepresentable {
         
         func setupModelAndRequest() {
             // Caricamento del modello CoreML
-            guard let model = try? VNCoreMLModel(for: ASL_Classifier(configuration: MLModelConfiguration()).model) else {
+            guard let model = try? VNCoreMLModel(for: apprehand_Image_2409(configuration: MLModelConfiguration()).model) else {
                 fatalError("Failed to load model")
             }
             self.model = model
@@ -51,9 +52,10 @@ struct CameraView: UIViewControllerRepresentable {
                     return
                 }
                 
-                guard let results = request.results as? [VNRecognizedObjectObservation], let bestResult = results.first else { return }
+                guard let results = request.results as? [VNClassificationObservation], let bestResult = results.first else { return }
                 
-                //print("Miglior risultato", bestResult.labels[0].identifier)
+                //print("Risultati", results)
+                print("Miglior risultato", bestResult.identifier)
                 
                 var isCalculating = true
                 
@@ -62,8 +64,8 @@ struct CameraView: UIViewControllerRepresentable {
                 }
                 
                 while isCalculating {
-                    let foundLetter = bestResult.labels[0].identifier
-                    let confidence = bestResult.labels[0].confidence
+                    let foundLetter = bestResult.identifier
+                    let confidence = bestResult.confidence
                     
                     if self.foundLetters[foundLetter] == nil {
                         self.foundLetters[foundLetter] = [-1, -1]
@@ -95,7 +97,7 @@ struct CameraView: UIViewControllerRepresentable {
                 
                 self.foundLetters = [:]
                 
-                //print("Lettera rilevata", maxLetter)
+                print("Lettera rilevata", maxLetter)
                 self.handlePrediction(prediction: maxLetter)
             })
             self.request = request
@@ -114,8 +116,14 @@ struct CameraView: UIViewControllerRepresentable {
                 return
             }
             
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+            guard let resizedImage = preprocessImage(sampleBuffer) else { return }
+            
+            //guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+            guard let pixelBuffer = resizedImage.toCVPixelBuffer() else { return }
             let exifOrientation = exifOrientationFromDeviceOrientation()
+            
+            saveImageFromBuffer(sampleBuffer)
+            
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: [:])
             do {
                 try imageRequestHandler.perform([self.request!])
@@ -125,11 +133,11 @@ struct CameraView: UIViewControllerRepresentable {
         }
         
         /*func handleRequest(request: VNRequest, error: Error?) {
-            guard let results = request.results as? [VNClassificationObservation], let bestResult = results.first else { return }
-            DispatchQueue.main.async {
-                self.parent.handlePrediction(prediction: bestResult.identifier)
-            }
-        }*/
+         guard let results = request.results as? [VNClassificationObservation], let bestResult = results.first else { return }
+         DispatchQueue.main.async {
+         self.parent.handlePrediction(prediction: bestResult.identifier)
+         }
+         }*/
         
         public func exifOrientationFromDeviceOrientation() -> CGImagePropertyOrientation {
             let curDeviceOrientation = UIDevice.current.orientation
@@ -206,6 +214,84 @@ struct CameraView: UIViewControllerRepresentable {
             previewLayer.frame = rootLayer.bounds
             rootLayer.addSublayer(previewLayer)
         }
+        
+        func saveImageFromBuffer(_ buffer: CMSampleBuffer) {
+            /*guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+             
+             // Crea un CIImage dal pixel buffer
+             let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+             
+             // Crea un contesto per convertire CIImage in UIImage
+             let context = CIContext()
+             guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
+             
+             // Converti CGImage in UIImage
+             let uiImage = UIImage(cgImage: cgImage)*/
+            
+            guard let uiImage = preprocessImage(buffer) else { return }
+            
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    // Salva l'immagine nella libreria delle foto
+                    UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil)
+                    print("Immagine salvata nelle foto.")
+                } else {
+                    print("Permesso per accedere alla libreria delle foto non concesso.")
+                }
+            }
+            /*let activityViewController = UIActivityViewController(activityItems: [uiImage], applicationActivities: nil)
+             if let viewController = UIApplication.shared.windows.first?.rootViewController {
+             viewController.present(activityViewController, animated: true, completion: nil)
+             }*/
+            
+            // Converti UIImage in dati PNG o JPEG
+            /*guard let imageData = uiImage.jpegData(compressionQuality: 1.0) else { return } // Puoi anche usare uiImage.pngData()
+             
+             // Definisci il percorso per salvare l'immagine
+             let fileManager = FileManager.default
+             let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+             let fileURL = documentsURL.appendingPathComponent("captured_frame.jpg")
+             
+             do {
+             // Scrivi i dati dell'immagine nel file
+             try imageData.write(to: fileURL)
+             print("Immagine salvata con successo in: \(fileURL)")
+             } catch {
+             print("Errore nel salvataggio dell'immagine: \(error)")
+             }*/
+        }
+        
+        func preprocessImage(_ sampleBuffer: CMSampleBuffer) -> UIImage? {
+            // Estrai l'immagine dal buffer
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
+            
+            // Converti l'immagine in CIImage
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            
+            // Calcola il rettangolo per ritagliare l'immagine al centro in formato quadrato
+            let imageSize = ciImage.extent.size
+            let minSide = min(imageSize.width, imageSize.height)
+            let cropRect = CGRect(x: (imageSize.width - minSide) / 2,
+                                  y: (imageSize.height - minSide) / 2,
+                                  width: minSide,
+                                  height: minSide)
+            
+            // Crea una nuova CIImage ritagliata
+            let croppedCIImage = ciImage.cropped(to: cropRect)
+            
+            // Converti l'immagine ritagliata in UIImage per facilitare la rotazione
+            let context = CIContext()
+            guard let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) else { return nil }
+            let croppedUIImage = UIImage(cgImage: cgImage)
+            
+            // Ruota l'immagine a destra di 90 gradi
+            let rotatedUIImage = croppedUIImage.rotate(radians: .pi / 2)
+            
+            // Ridimensiona l'immagine ruotata a 200x200 pixel
+            let resizedImage = rotatedUIImage.resize(to: CGSize(width: 200, height: 200))
+            
+            return resizedImage
+        }
     }
     
     func makeCoordinator() -> Coordinator {
@@ -253,6 +339,72 @@ struct CameraView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         context.coordinator.isShowingResult = showResult
     }
-
+    
 }
 
+extension UIImage {
+    // Estensione per ridimensionare un'immagine a una nuova dimensione
+    func resize(to size: CGSize) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
+        draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage ?? self
+    }
+    
+    // Estensione per ruotare un'immagine di un angolo specifico in radianti
+    func rotate(radians: CGFloat) -> UIImage {
+        var newSize = CGRect(origin: .zero, size: size)
+            .applying(CGAffineTransform(rotationAngle: radians))
+            .integral.size
+        // Correggi la dimensione
+        newSize.width = floor(newSize.width)
+        newSize.height = floor(newSize.height)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, scale)
+        let context = UIGraphicsGetCurrentContext()!
+        
+        // Sposta il contesto al centro della nuova dimensione
+        context.translateBy(x: newSize.width / 2, y: newSize.height / 2)
+        // Ruota il contesto
+        context.rotate(by: radians)
+        // Disegna l'immagine nel contesto, tenendo conto della rotazione e traslazione
+        draw(in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.width, height: size.height))
+        
+        let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return rotatedImage ?? self
+    }
+    
+    func toCVPixelBuffer() -> CVPixelBuffer? {
+        let width = Int(self.size.width)
+        let height = Int(self.size.height)
+        var pixelBuffer: CVPixelBuffer?
+        
+        let attrs = [
+            kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
+            kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue
+        ] as CFDictionary
+        
+        let status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32ARGB, attrs, &pixelBuffer)
+        guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
+            return nil
+        }
+        
+        CVPixelBufferLockBaseAddress(buffer, [])
+        let pixelData = CVPixelBufferGetBaseAddress(buffer)
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        guard let context = CGContext(data: pixelData, width: width, height: height,
+                                      bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+                                      space: colorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue) else {
+            return nil
+        }
+        
+        guard let cgImage = self.cgImage else { return nil }
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        CVPixelBufferUnlockBaseAddress(buffer, [])
+        
+        return buffer
+    }}
