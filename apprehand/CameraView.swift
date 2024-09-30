@@ -13,7 +13,7 @@ struct CameraView: UIViewControllerRepresentable {
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         var isShowingResult: Bool = false
         var parent: CameraView
-        var model: VNCoreMLModel?
+        var model: HandPoseClassifier?
         var request: VNCoreMLRequest?
         var foundLetters: [String: [Float]] = [:]
         // int 0 = occorrenze
@@ -33,15 +33,74 @@ struct CameraView: UIViewControllerRepresentable {
             
             super.init()
             
-            setupModelAndRequest()
+            self.loadModel()
+            //setupModelAndRequest()
         }
         
-        func setupModelAndRequest() {
-            // Caricamento del modello CoreML
-            guard let model = try? VNCoreMLModel(for: apprehand_Image_2409(configuration: MLModelConfiguration()).model) else {
-                fatalError("Failed to load model")
+        func loadModel() {
+            do {
+                self.model = try HandPoseClassifier(configuration: MLModelConfiguration())
+            } catch {
+                print ("Errore nel caricamento del modello: \(error.localizedDescription)")
             }
-            self.model = model
+        }
+        
+        // Funzione per l'inferenza diretta
+                func classifyImage(image: UIImage) {
+                    guard let model = self.model else { return }
+
+                    do {
+                        // Converte l'immagine in CVPixelBuffer
+                        /*guard let pixelBuffer = image.toCVPixelBuffer() else {
+                            print("Errore nella conversione dell'immagine in CVPixelBuffer")
+                            return
+                        }*/
+                        
+                        //guard let multiArray = image.toMLMultiArray(size: CGSize(width: 21, height: 3)) else {
+                        let multiArray = image.mlMultiArray()
+                        
+                        // Crea un input per il modello
+                        /*let input = try HandPoseClassifierInput(poses: [
+                            "image" : MLFeatureValue(pixelBuffer: pixelBuffer)
+                        ])*/
+
+                        // Esegue l'inferenza
+                        let prediction = try model.prediction(poses: multiArray)
+                        let letterValues = prediction.labelProbabilities
+                        
+                        //print("Label probabilities", prediction.labelProbabilities)
+                        if let (maxLetter, maxValue) = letterValues.max(by: { $0.value < $1.value }) {
+                            print("La lettera con il valore massimo è: \(maxLetter) con valore \(maxValue)")
+                        } else {
+                            print("Il dizionario è vuoto.")
+                        }
+                        
+                        // Recupera l'output
+                        /*if let predictedClass = prediction.featureValue(for: "classLabel")?.stringValue {
+                            print("Predizione: \(predictedClass)")
+                            // Gestisci la predizione
+                            handlePrediction(prediction: predictedClass)
+                        }*/
+
+                    } catch {
+                        print("Errore durante l'inferenza: \(error.localizedDescription)")
+                    }
+                }
+
+
+
+        /*func setupModelAndRequest() {
+            // Caricamento del modello CoreML
+            do {
+                let model = try HandPoseClassifier(configuration: MLModelConfiguration())
+                
+                
+                /*guard let model = try? VNCoreMLModel(for: loadedModel) else {
+                    fatalError("Failesd to load model as VNCoreMLModel")
+                }*/
+                self.model = model
+                
+                
             lazy var request = VNCoreMLRequest(model: model, completionHandler: { (request, error) in
                 if let error = error {
                     print("Error during the request: \(error.localizedDescription)")
@@ -102,7 +161,12 @@ struct CameraView: UIViewControllerRepresentable {
             })
             self.request = request
             self.request?.imageCropAndScaleOption = .centerCrop
-        }
+                
+            } catch {
+                print("Error loading model: \(error)")
+                fatalError("e")
+            }
+        }*/
         
         func handlePrediction(prediction: String) {
             DispatchQueue.main.async {
@@ -110,7 +174,19 @@ struct CameraView: UIViewControllerRepresentable {
             }
         }
         
-        func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        // Esegue l'inferenza ogni volta che viene catturato un frame
+                func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+                    guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+                    
+                    // Converte il pixelBuffer in UIImage per la classificazione
+                    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                    let uiImage = UIImage(ciImage: ciImage)
+
+                    // Effettua la classificazione diretta
+                    classifyImage(image: uiImage)
+                }
+        
+        /*func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             
             if isShowingResult {
                 return
@@ -122,15 +198,15 @@ struct CameraView: UIViewControllerRepresentable {
             guard let pixelBuffer = resizedImage.toCVPixelBuffer() else { return }
             let exifOrientation = exifOrientationFromDeviceOrientation()
             
-            saveImageFromBuffer(sampleBuffer)
+            //saveImageFromBuffer(sampleBuffer)
             
-            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: [:])
+            /*let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: [:])
             do {
                 try imageRequestHandler.perform([self.request!])
             } catch {
                 print(error)
-            }
-        }
+            }*/
+        }*/
         
         /*func handleRequest(request: VNRequest, error: Error?) {
          guard let results = request.results as? [VNClassificationObservation], let bestResult = results.first else { return }
@@ -343,14 +419,88 @@ struct CameraView: UIViewControllerRepresentable {
 }
 
 extension UIImage {
+    
+    /*func toMLMultiArray(size: CGSize) -> MLMultiArray? {
+            // 1. Ridimensiona l'immagine alla dimensione richiesta
+            guard let resizedImage = self.resize(to: size),
+                  let cgImage = resizedImage.cgImage else {
+                print("Errore nel ridimensionamento dell'immagine")
+                return nil
+            }
+
+            // 2. Ottieni le informazioni sul colore e sui dati dell'immagine
+            let width = Int(size.width)
+            let height = Int(size.height)
+            let bytesPerPixel = 4 // RGBA = 4 byte
+            let bytesPerRow = bytesPerPixel * width
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let rawData = UnsafeMutablePointer<UInt8>.allocate(capacity: height * width * bytesPerPixel)
+            
+            guard let context = CGContext(
+                data: rawData,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: colorSpace,
+                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
+            ) else {
+                print("Errore nella creazione del contesto bitmap")
+                rawData.deallocate()
+                return nil
+            }
+            
+            // Disegna l'immagine nel contesto per ottenere i dati dei pixel
+            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            
+            // 3. Crea un MLMultiArray con la forma richiesta
+            guard let mlMultiArray = try? MLMultiArray(shape: [1, NSNumber(value: height), NSNumber(value: width)], dataType: .float32) else {
+                print("Errore nella creazione di MLMultiArray")
+                rawData.deallocate()
+                return nil
+            }
+            
+            // 4. Popola l'MLMultiArray con i valori dei pixel
+            var pixelIndex = 0
+            for row in 0..<height {
+                for col in 0..<width {
+                    let index = (row * width + col) * bytesPerPixel
+                    let r = Float32(rawData[index]) / 255.0
+                    let g = Float32(rawData[index + 1]) / 255.0
+                    let b = Float32(rawData[index + 2]) / 255.0
+                    
+                    // Converti in scala di grigi o utilizza i valori RGB a seconda del modello
+                    let grayscale = (r + g + b) / 3.0
+                    
+                    // Inserisci il valore nel MultiArray
+                    mlMultiArray[[0, NSNumber(value: row), NSNumber(value: col)]] = NSNumber(value: grayscale)
+                    
+                    pixelIndex += 1
+                }
+            }
+            
+            // Dealloca i dati raw
+            rawData.deallocate()
+            
+            return mlMultiArray
+        }*/
+    
+    func resize(to size: CGSize) -> UIImage? {
+            UIGraphicsBeginImageContextWithOptions(size, false, self.scale)
+            self.draw(in: CGRect(origin: .zero, size: size))
+            let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return resizedImage
+        }
+    
     // Estensione per ridimensionare un'immagine a una nuova dimensione
-    func resize(to size: CGSize) -> UIImage {
+    /*func resize(to size: CGSize) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         draw(in: CGRect(origin: .zero, size: size))
         let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return resizedImage ?? self
-    }
+    }*/
     
     // Estensione per ruotare un'immagine di un angolo specifico in radianti
     func rotate(radians: CGFloat) -> UIImage {
@@ -407,4 +557,153 @@ extension UIImage {
         CVPixelBufferUnlockBaseAddress(buffer, [])
         
         return buffer
-    }}
+    }
+
+    func mlMultiArray(scale preprocessScale:Double=255, rBias preprocessRBias:Double=0, gBias preprocessGBias:Double=0, bBias preprocessBBias:Double=0) -> MLMultiArray {
+            let imagePixel = self.getPixelRgb(scale: preprocessScale, rBias: preprocessRBias, gBias: preprocessGBias, bBias: preprocessBBias)
+            let size = self.size
+            let imagePointer : UnsafePointer<Double> = UnsafePointer(imagePixel)
+            let mlArray = try! MLMultiArray(shape: [3,  NSNumber(value: Float(size.width)), NSNumber(value: Float(size.height))], dataType: MLMultiArrayDataType.double)
+            mlArray.dataPointer.initializeMemory(as: Double.self, from: imagePointer, count: imagePixel.count)
+            return mlArray
+        }
+        
+        func mlMultiArrayGrayScale(scale preprocessScale:Double=255,bias preprocessBias:Double=0) -> MLMultiArray {
+            let imagePixel = self.getPixelGrayScale(scale: preprocessScale, bias: preprocessBias)
+            let size = self.size
+            let imagePointer : UnsafePointer<Double> = UnsafePointer(imagePixel)
+            let mlArray = try! MLMultiArray(shape: [1,  NSNumber(value: Float(size.width)), NSNumber(value: Float(size.height))], dataType: MLMultiArrayDataType.double)
+            mlArray.dataPointer.initializeMemory(as: Double.self, from: imagePointer, count: imagePixel.count)
+            return mlArray
+        }
+
+        func getPixelRgb(scale preprocessScale:Double=255, rBias preprocessRBias:Double=0, gBias preprocessGBias:Double=0, bBias preprocessBBias:Double=0) -> [Double]
+        {
+            guard let cgImage = self.cgImage else {
+                return []
+            }
+            let bytesPerRow = cgImage.bytesPerRow
+            let width = cgImage.width
+            let height = cgImage.height
+            let bytesPerPixel = 4
+            let pixelData = cgImage.dataProvider!.data! as Data
+            
+            var r_buf : [Double] = []
+            var g_buf : [Double] = []
+            var b_buf : [Double] = []
+            
+            for j in 0..<height {
+                for i in 0..<width {
+                    let pixelInfo = bytesPerRow * j + i * bytesPerPixel
+                    let r = Double(pixelData[pixelInfo])
+                    let g = Double(pixelData[pixelInfo+1])
+                    let b = Double(pixelData[pixelInfo+2])
+                    r_buf.append(Double(r/preprocessScale)+preprocessRBias)
+                    g_buf.append(Double(g/preprocessScale)+preprocessGBias)
+                    b_buf.append(Double(b/preprocessScale)+preprocessBBias)
+                }
+            }
+            return ((b_buf + g_buf) + r_buf)
+        }
+        
+        func getPixelGrayScale(scale preprocessScale:Double=255, bias preprocessBias:Double=0) -> [Double]
+        {
+            guard let cgImage = self.cgImage else {
+                return []
+            }
+            let bytesPerRow = cgImage.bytesPerRow
+            let width = cgImage.width
+            let height = cgImage.height
+            let bytesPerPixel = 2
+            let pixelData = cgImage.dataProvider!.data! as Data
+            
+            var buf : [Double] = []
+            
+            for j in 0..<height {
+                for i in 0..<width {
+                    let pixelInfo = bytesPerRow * j + i * bytesPerPixel
+                    let v = Double(pixelData[pixelInfo])
+                    buf.append(Double(v/preprocessScale)+preprocessBias)
+                }
+            }
+            return buf
+        }
+}
+
+extension CVPixelBuffer {
+    /// Converte il CVPixelBuffer in un MLMultiArray con la forma desiderata.
+    func toMLMultiArray() -> MLMultiArray? {
+        // Passo 1: Blocca la base address del buffer e crea un CIImage
+        CVPixelBufferLockBaseAddress(self, .readOnly)
+        guard let baseAddress = CVPixelBufferGetBaseAddress(self) else {
+            print("Errore nel recuperare la base address del PixelBuffer")
+            return nil
+        }
+        
+        // Crea un CIImage dal PixelBuffer
+        let ciImage = CIImage(cvPixelBuffer: self)
+
+        // Passo 2: Creazione di un contesto Core Image e converti CIImage in CGImage
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
+            print("Errore nella conversione da CIImage a CGImage")
+            CVPixelBufferUnlockBaseAddress(self, .readOnly)
+            return nil
+        }
+
+        // Passo 3: Crea un array di pixel dal CGImage
+        let width = cgImage.width
+        let height = cgImage.height
+        let bytesPerRow = cgImage.bytesPerRow
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGImageAlphaInfo.noneSkipLast.rawValue
+
+        // Buffer per immagazzinare i dati dei pixel
+        var rawData = [UInt8](repeating: 0, count: Int(height * bytesPerRow))
+        guard let contextRef = CGContext(data: &rawData,
+                                         width: width,
+                                         height: height,
+                                         bitsPerComponent: 8,
+                                         bytesPerRow: bytesPerRow,
+                                         space: colorSpace,
+                                         bitmapInfo: bitmapInfo) else {
+            print("Errore nella creazione del contesto bitmap")
+            CVPixelBufferUnlockBaseAddress(self, .readOnly)
+            return nil
+        }
+
+        // Disegna l'immagine nel contesto per ottenere i dati dei pixel
+        contextRef.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        // Passo 4: Crea un MLMultiArray con la forma desiderata
+        guard let mlMultiArray = try? MLMultiArray(shape: [1, NSNumber(value: height), NSNumber(value: width)], dataType: .float32) else {
+            print("Errore nella creazione di MLMultiArray")
+            CVPixelBufferUnlockBaseAddress(self, .readOnly)
+            return nil
+        }
+
+        // Passo 5: Riempire l'MLMultiArray con i dati dei pixel
+        var pixelIndex = 0
+        for row in 0..<height {
+            for col in 0..<width {
+                let index = (row * bytesPerRow) + (col * 4) // 4 valori per RGBA
+                let r = Float32(rawData[index]) / 255.0
+                let g = Float32(rawData[index+1]) / 255.0
+                let b = Float32(rawData[index+2]) / 255.0
+
+                // Calcola la scala di grigi o usa un solo canale se il modello richiede un array unidimensionale
+                let grayscale = (r + g + b) / 3.0
+                
+                // Inserisci il valore nel MultiArray
+                mlMultiArray[[0, NSNumber(value: row), NSNumber(value: col)]] = NSNumber(value: grayscale)
+
+                pixelIndex += 1
+            }
+        }
+
+        // Rilascia il buffer del PixelBuffer
+        CVPixelBufferUnlockBaseAddress(self, .readOnly)
+
+        return mlMultiArray
+    }
+}
