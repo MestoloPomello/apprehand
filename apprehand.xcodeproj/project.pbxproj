@@ -24,8 +24,8 @@
 		EAC19FAA2C820AF4001F48E1 /* en.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FA92C820AF4001F48E1 /* en.swift */; };
 		EAC19FAC2C820AFC001F48E1 /* fr.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FAB2C820AFC001F48E1 /* fr.swift */; };
 		EAC19FAE2C820B07001F48E1 /* es.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FAD2C820B07001F48E1 /* es.swift */; };
+		EAD09CCD2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = EAD09CCC2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage */; };
 		EAD7D3F82C9091F700A79972 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD7D3F72C9091F700A79972 /* LanguageManager.swift */; };
-		EAE0011A2CAAFD14006216F5 /* HandPoseClassifier.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = EAE001192CAAFD14006216F5 /* HandPoseClassifier.mlmodel */; };
 		EAEE0D562CA315B300EA51DA /* apprehand_Image_2409.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = EAEE0D552CA315B300EA51DA /* apprehand_Image_2409.mlmodel */; };
 /* End PBXBuildFile section */
 
@@ -68,8 +68,8 @@
 		EAC19FA92C820AF4001F48E1 /* en.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = en.swift; sourceTree = "<group>"; };
 		EAC19FAB2C820AFC001F48E1 /* fr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = fr.swift; sourceTree = "<group>"; };
 		EAC19FAD2C820B07001F48E1 /* es.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = es.swift; sourceTree = "<group>"; };
+		EAD09CCC2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; name = HandPoseClassifier.mlpackage; path = ../../../../Downloads/HandPoseClassifier.mlpackage; sourceTree = "<group>"; };
 		EAD7D3F72C9091F700A79972 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
-		EAE001192CAAFD14006216F5 /* HandPoseClassifier.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = HandPoseClassifier.mlmodel; path = ../../../../Downloads/HandPoseClassifier.mlmodel; sourceTree = "<group>"; };
 		EAEE0D552CA315B300EA51DA /* apprehand_Image_2409.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = apprehand_Image_2409.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -168,7 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				EAEE0D552CA315B300EA51DA /* apprehand_Image_2409.mlmodel */,
-				EAE001192CAAFD14006216F5 /* HandPoseClassifier.mlmodel */,
+				EAD09CCC2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -320,10 +320,10 @@
 				EAC19FA82C8209D9001F48E1 /* it.swift in Sources */,
 				EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */,
 				EA08E8602C592BC000004021 /* Item.swift in Sources */,
+				EAD09CCD2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage in Sources */,
 				EA84D0282C5A7D5600F5B1EF /* ResultsView.swift in Sources */,
 				EAC19FAC2C820AFC001F48E1 /* fr.swift in Sources */,
 				EAC19FAA2C820AF4001F48E1 /* en.swift in Sources */,
-				EAE0011A2CAAFD14006216F5 /* HandPoseClassifier.mlmodel in Sources */,
 				EAEE0D562CA315B300EA51DA /* apprehand_Image_2409.mlmodel in Sources */,
 				EAC19FAE2C820B07001F48E1 /* es.swift in Sources */,
 				EA08E88E2C5931A600004021 /* SharedResources.swift in Sources */,
