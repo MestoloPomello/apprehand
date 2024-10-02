@@ -11,6 +11,7 @@ struct CameraView: UIViewControllerRepresentable {
     @Binding var showResult: Bool
     
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+        @State private var recognizedLetter: String = "N/A"
         var isShowingResult: Bool = false
         var parent: CameraView
         var model: HandPoseClassifier?
@@ -285,54 +286,55 @@ struct CameraView: UIViewControllerRepresentable {
             }
         }
     
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(parent: self)
-    }
-    
-    func makeUIViewController(context: Context) -> UIViewController {
-        let viewController = UIViewController()
-        let captureSession = AVCaptureSession()
-        captureSession.sessionPreset = .photo
+        func makeCoordinator() -> Coordinator {
+            return Coordinator(parent: self)
+        }
         
-        guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+        func makeUIViewController(context: Context) -> UIViewController {
+            let viewController = UIViewController()
+            let captureSession = AVCaptureSession()
+            captureSession.sessionPreset = .photo
+            
+            guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+                return viewController
+            }
+            
+            let videoInput: AVCaptureDeviceInput
+            do {
+                videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            } catch {
+                return viewController
+            }
+            
+            if captureSession.canAddInput(videoInput) {
+                captureSession.addInput(videoInput)
+            } else {
+                return viewController
+            }
+            
+            let videoOutput = AVCaptureVideoDataOutput()
+            videoOutput.setSampleBufferDelegate(context.coordinator, queue: DispatchQueue(label: "videoQueue"))
+            if captureSession.canAddOutput(videoOutput) {
+                captureSession.addOutput(videoOutput)
+            }
+            
+            let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+            previewLayer.frame = viewController.view.bounds
+            previewLayer.videoGravity = .resizeAspectFill
+            viewController.view.layer.addSublayer(previewLayer)
+            
+            previewLayer.connection?.videoOrientation = .portrait // = .pi / 2
+            
+            captureSession.startRunning()
+            
             return viewController
         }
         
-        let videoInput: AVCaptureDeviceInput
-        do {
-            videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-        } catch {
-            return viewController
+        func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+            context.coordinator.isShowingResult = showResult
         }
         
-        if captureSession.canAddInput(videoInput) {
-            captureSession.addInput(videoInput)
-        } else {
-            return viewController
-        }
-        
-        let videoOutput = AVCaptureVideoDataOutput()
-        videoOutput.setSampleBufferDelegate(context.coordinator, queue: DispatchQueue(label: "videoQueue"))
-        if captureSession.canAddOutput(videoOutput) {
-            captureSession.addOutput(videoOutput)
-        }
-        
-        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer.frame = viewController.view.bounds
-        previewLayer.videoGravity = .resizeAspectFill
-        viewController.view.layer.addSublayer(previewLayer)
-        
-        previewLayer.connection?.videoOrientation = .portrait // = .pi / 2
-        
-        captureSession.startRunning()
-        
-        return viewController
     }
-    
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        context.coordinator.isShowingResult = showResult
-    }
-    
 }
 
 
