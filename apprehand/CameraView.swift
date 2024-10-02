@@ -6,7 +6,6 @@ import CoreImage
 import Photos
 import UIKit
 
-// CameraView per gestire la cattura video
 struct CameraView: UIViewControllerRepresentable {
     
     @Binding var showResult: Bool
@@ -17,6 +16,7 @@ struct CameraView: UIViewControllerRepresentable {
         var model: HandPoseClassifier?
         var request: VNCoreMLRequest?
         var foundLetters: [String: [Float]] = [:]
+        private let handPoseClassifier = try? HandPoseClassifier()
         // int 0 = occorrenze
         // int 1 = max confidenza
         
@@ -26,7 +26,12 @@ struct CameraView: UIViewControllerRepresentable {
         private let videoDataOutput = AVCaptureVideoDataOutput()
         private let session = AVCaptureSession()
         private var previewLayer: AVCaptureVideoPreviewLayer! = nil
-        private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutput", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+        private let videoDataOutputQueue = DispatchQueue(
+            label: "VideoDataOutput",
+            qos: .userInitiated,
+            attributes: [],
+            autoreleaseFrequency: .workItem
+        )
         
         init(parent: CameraView) {
             self.parent = parent
@@ -35,7 +40,6 @@ struct CameraView: UIViewControllerRepresentable {
             super.init()
             
             self.loadModel()
-            //upModelAndRequest()
         }
         
         func loadModel() {
@@ -45,37 +49,116 @@ struct CameraView: UIViewControllerRepresentable {
                 print ("Errore nel caricamento del modello: \(error.localizedDescription)")
             }
         }
+
+        func extractHandPose(from sampleBuffer: CMSampleBuffer, completion: @escaping ([CGPoint]?) -> Void) {
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                completion(nil)
+                return
+            }
+
+            let request = VNDetectHumanHandPoseRequest()
+            request.maximumHandCount = 1
+
+            let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try requestHandler.perform([request])
+                    guard let results = request.results?.first else {
+                        completion(nil)
+                        return
+                    }
+
+                    // Ottieni i keypoints (ossia i punti della mano)
+                    let keypoints = try results.recognizedPoints(.all)
+                    
+                    // Estrai i punti specifici ordinati come desiderato (wrist, thumbCMC, thumbMP, etc.)
+                    let keypointNames: [VNHumanHandPoseObservation.JointName] = [
+                        .wrist, .thumbCMC, .thumbMP, .thumbIP, .thumbTip,
+                        .indexMCP, .indexPIP, .indexDIP, .indexTip,
+                        .middleMCP, .middlePIP, .middleDIP, .middleTip,
+                        .ringMCP, .ringPIP, .ringDIP, .ringTip,
+                        .littleMCP, .littlePIP, .littleDIP, .littleTip
+                    ]
+                    
+                    var keypointPositions: [CGPoint] = []
+                    for name in keypointNames {
+                        if let point = keypoints[name], point.confidence > 0.5 {
+                            keypointPositions.append(CGPoint(x: point.location.x, y: 1 - point.location.y)) // Normalizzato su 0-1
+                        } else {
+                            keypointPositions.append(.zero) // Placeholder per punti mancanti
+                        }
+                    }
+                    
+                    completion(keypointPositions)
+                } catch {
+                    completion(nil)
+                }
+            }
+        }
+
+        func createMLMultiArray(from keypoints: [CGPoint]) -> MLMultiArray? {
+            guard keypoints.count == 21 else { return nil } // Assicurati che ci siano esattamente 21 punti
+
+            // Crea un MLMultiArray con dimensioni [1, 3, 21]
+            let shape: [NSNumber] = [1, 3, 21]
+            guard let multiArray = try? MLMultiArray(shape: shape, dataType: .float32) else { return nil }
+
+            // Inserisci i valori di x, y, e confidence (per ora confidence sarà impostato a 1.0 per ogni punto)
+            for (index, point) in keypoints.enumerated() {
+                multiArray[[0, 0, NSNumber(value: index)]] = NSNumber(value: Float(point.x))
+                multiArray[[0, 1, NSNumber(value: index)]] = NSNumber(value: Float(point.y))
+                multiArray[[0, 2, NSNumber(value: index)]] = 1.0 // Confidence a 1.0
+            }
+
+            return multiArray
+        }
+
+        func classifyHandPose(with multiArray: MLMultiArray) -> String? {
+            do {
+                let model = try HandPoseClassifier() // Inizializza il modello
+                let output = try model.prediction(poses: multiArray) // Esegui la previsione
+                return output.label // Restituisce la lettera prevista
+            } catch {
+                print("Errore nella classificazione: \(error)")
+                return nil
+            }
+        }
+
+        private func classifyHandPose(with multiArray: MLMultiArray) -> String? {
+            guard let handPoseClassifier = handPoseClassifier else { return nil }
+
+            do {
+                // Effettua la predizione usando il modello con l'input MLMultiArray
+                let output = try handPoseClassifier.prediction(poses: multiArray)
+
+                // Restituisce l'etichetta con la previsione più probabile
+                return output.label
+            } catch {
+                print("Errore durante la classificazione della posa della mano: \(error)")
+                return nil
+            }
+        }
         
         // Funzione per l'inferenza diretta
         func classifyImage(buffer: CMSampleBuffer) {
             guard let model = self.model else { return }
             
             do {
-                // Converte l'immagine in CVPixelBuffer
-                /*guard let pixelBuffer = image.toCVPixelBuffer() else {
-                 print("Errore nella conversione dell'immagine in CVPixelBuffer")
-                 return
-                 }*/
-                
-                //guard let multiArray = image.toMLMultiArray(size: CGSize(width: 21, height: 3)) else {
-                
-                //saveImageFromBuffer(buffer)
-                
-                guard let multiArray: MLMultiArray = extractKeypointsForHandPoseClassifier(from: buffer) else
-                {
-                    print("Errore nell'estrazione dei punti")
-                    return
+                // Estrarre i punti dall'immagine
+                extractHandPose(from: sampleBuffer) { keypoints in
+                    guard let keypoints = keypoints, let mlArray = createMLMultiArray(from: keypoints) else {
+                        recognizedLetter = "N/A"
+                        return
+                    }
+                    
+                    if let predictedLetter = classifyHandPose(with: mlArray) {
+                        print("LETTERA PREDETTA:", predictedLetter)
+                    }
                 }
-                
-                //let multiArray = image.mlMultiArray()
-                
-                // Crea un input per il modello
-                /*let input = try HandPoseClassifierInput(poses: [
-                 "image" : MLFeatureValue(pixelBuffer: pixelBuffer)
-                 ])*/
-                
+
                 // Esegue l'inferenza
-                let prediction = try model.prediction(poses: multiArray)
+                /*let prediction = try model.prediction(poses: multiArray)
                 let letterValues = prediction.labelProbabilities
                 print("letterValues", letterValues)
                 
@@ -85,7 +168,7 @@ struct CameraView: UIViewControllerRepresentable {
                     print("La lettera con il valore massimo è: \(maxLetter) con valore \(maxValue)")
                 } else {
                     print("Il dizionario è vuoto.")
-                }
+                }*/
                 
                 // Recupera l'output
                 /*if let predictedClass = prediction.featureValue(for: "classLabel")?.stringValue {
@@ -107,12 +190,8 @@ struct CameraView: UIViewControllerRepresentable {
         
         // Esegue l'inferenza ogni volta che viene catturato un frame
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            
-            // Converte il pixelBuffer in UIImage per la classificazione
-            //let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            //let uiImage = UIImage(ciImage: ciImage)
-            
+            // guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
             // Effettua la classificazione diretta
             classifyImage(buffer: sampleBuffer)
         }
@@ -194,20 +273,7 @@ struct CameraView: UIViewControllerRepresentable {
         }
         
         func saveImageFromBuffer(_ buffer: CMSampleBuffer) {
-            /*guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-             
-             // Crea un CIImage dal pixel buffer
-             let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-             
-             // Crea un contesto per convertire CIImage in UIImage
-             let context = CIContext()
-             guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
-             
-             // Converti CGImage in UIImage
-             let uiImage = UIImage(cgImage: cgImage)*/
-            
             guard let uiImage = preprocessImage(buffer) else { return }
-            
             PHPhotoLibrary.requestAuthorization { status in
                 if status == .authorized {
                     // Salva l'immagine nella libreria delle foto
@@ -217,60 +283,7 @@ struct CameraView: UIViewControllerRepresentable {
                     print("Permesso per accedere alla libreria delle foto non concesso.")
                 }
             }
-            /*let activityViewController = UIActivityViewController(activityItems: [uiImage], applicationActivities: nil)
-             if let viewController = UIApplication.shared.windows.first?.rootViewController {
-             viewController.present(activityViewController, animated: true, completion: nil)
-             }*/
-            
-            // Converti UIImage in dati PNG o JPEG
-            /*guard let imageData = uiImage.jpegData(compressionQuality: 1.0) else { return } // Puoi anche usare uiImage.pngData()
-             
-             // Definisci il percorso per salvare l'immagine
-             let fileManager = FileManager.default
-             let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-             let fileURL = documentsURL.appendingPathComponent("captured_frame.jpg")
-             
-             do {
-             // Scrivi i dati dell'immagine nel file
-             try imageData.write(to: fileURL)
-             print("Immagine salvata con successo in: \(fileURL)")
-             } catch {
-             print("Errore nel salvataggio dell'immagine: \(error)")
-             }*/
         }
-        
-        func preprocessImage(_ sampleBuffer: CMSampleBuffer) -> UIImage? {
-            // Estrai l'immagine dal buffer
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
-            
-            // Converti l'immagine in CIImage
-            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            
-            // Calcola il rettangolo per ritagliare l'immagine al centro in formato quadrato
-            let imageSize = ciImage.extent.size
-            let minSide = min(imageSize.width, imageSize.height)
-            let cropRect = CGRect(x: (imageSize.width - minSide) / 2,
-                                  y: (imageSize.height - minSide) / 2,
-                                  width: minSide,
-                                  height: minSide)
-            
-            // Crea una nuova CIImage ritagliata
-            let croppedCIImage = ciImage.cropped(to: cropRect)
-            
-            // Converti l'immagine ritagliata in UIImage per facilitare la rotazione
-            let context = CIContext()
-            guard let cgImage = context.createCGImage(croppedCIImage, from: croppedCIImage.extent) else { return nil }
-            let croppedUIImage = UIImage(cgImage: cgImage)
-            
-            // Ruota l'immagine a destra di 90 gradi
-            let rotatedUIImage = croppedUIImage.rotate(radians: .pi / 2)
-            
-            // Ridimensiona l'immagine ruotata a 200x200 pixel
-            let resizedImage = rotatedUIImage.resize(to: CGSize(width: 200, height: 200))
-            
-            return resizedImage
-        }
-    }
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(parent: self)
@@ -320,238 +333,6 @@ struct CameraView: UIViewControllerRepresentable {
         context.coordinator.isShowingResult = showResult
     }
     
-}
-
-func rotateCVPixelBufferUsingCG(_ pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
-    let width = CVPixelBufferGetWidth(pixelBuffer)
-        let height = CVPixelBufferGetHeight(pixelBuffer)
-
-        var rotatedPixelBuffer: CVPixelBuffer?
-        let status = CVPixelBufferCreate(
-            nil,
-            height,  // Altezza e larghezza invertite
-            width,
-            CVPixelBufferGetPixelFormatType(pixelBuffer),
-            nil,
-            &rotatedPixelBuffer
-        )
-
-        guard status == kCVReturnSuccess, let outputBuffer = rotatedPixelBuffer else {
-            print("Errore nella creazione del buffer ruotato.")
-            return nil
-        }
-
-        // Lock base addresses
-        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-        CVPixelBufferLockBaseAddress(outputBuffer, .readOnly)
-
-        guard let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer),
-              let outputBaseAddress = CVPixelBufferGetBaseAddress(outputBuffer) else {
-            print("Errore nell'accesso all'indirizzo base del buffer.")
-            return nil
-        }
-
-        // Calculate bytes per row correctly
-        let bytesPerRowInput = CVPixelBufferGetBytesPerRow(pixelBuffer)
-        let bytesPerRowOutput = height * 4 // 4 bytes per pixel (RGBA)
-
-        // Create input and output context
-        let inputContext = CGContext(data: baseAddress,
-                                      width: width,
-                                      height: height,
-                                      bitsPerComponent: 8,
-                                      bytesPerRow: bytesPerRowInput,
-                                      space: CGColorSpaceCreateDeviceRGB(),
-                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-
-        let outputContext = CGContext(data: outputBaseAddress,
-                                       width: height,
-                                       height: width,
-                                       bitsPerComponent: 8,
-                                       bytesPerRow: bytesPerRowOutput,
-                                       space: CGColorSpaceCreateDeviceRGB(),
-                                       bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-
-        // Rotate context
-        outputContext?.translateBy(x: CGFloat(height), y: 0)
-        outputContext?.rotate(by: .pi / 2)
-
-        // Draw the input context in the output context
-        if let cgImage = inputContext?.makeImage() {
-            outputContext?.draw(cgImage, in: CGRect(x: 0, y: 0, width: height, height: width))
-        } else {
-            print("Errore nella creazione dell'immagine dal contesto di input.")
-        }
-
-        // Unlock base addresses
-        CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
-        CVPixelBufferUnlockBaseAddress(outputBuffer, .readOnly)
-
-        return outputBuffer}
-
-/// Funzione che prende un `CVPixelBuffer` come input e restituisce un `MLMultiArray` con i keypoints estratti.
-func extractKeypointsForHandPoseClassifier(from pixelBuffer: CVPixelBuffer) -> MLMultiArray? {
-    // Step 1: Creare una richiesta per rilevare la posa della mano usando Vision
-    
-    //let rotatedPixelBuffer = rotateCVPixelBufferUsingCG(pixelBuffer)
-    let rotatedPixelBuffer = pixelBuffer
-    
-    let handPoseRequest = VNDetectHumanHandPoseRequest()
-    handPoseRequest.maximumHandCount = 1
-    
-    // Step 2: Creare un gestore di richieste Vision usando il pixel buffer
-    let requestHandler = VNImageRequestHandler(cvPixelBuffer: rotatedPixelBuffer, options: [:])
-    
-    do {
-        // Eseguire la richiesta su CVPixelBuffer
-        try requestHandler.perform([handPoseRequest])
-        
-        // Ottenere la prima mano rilevata
-        guard let observation = handPoseRequest.results?.first else {
-            print("Nessuna mano rilevata nel buffer.")
-            return nil
-        }
-        
-        // Step 3: Estrarre i punti chiave della mano
-        let handLandmarks = try observation.recognizedPoints(.all)
-        
-        // Step 4: Creare un array per memorizzare i punti chiave con (x, y, confidence)
-        var keypointsArray: [Float] = Array(repeating: 0.0, count: 63)  // 3 valori per 21 punti chiave
-        
-        // Converti l'MLMultiArray in un array di `CGPoint`
-        var keypoints: [CGPoint] = []
-        for i in 0..<21 {
-            let x = keypointsArray[i * 3]//.floatValue
-            let y = keypointsArray[i * 3 + 1]//.floatValue
-            keypoints.append(CGPoint(x: CGFloat(x), y: CGFloat(y)))
-        }
-        
-        let jointNames: [VNHumanHandPoseObservation.JointName] = [
-            .wrist, .thumbCMC, .thumbMP, .thumbIP, .thumbTip, .indexMCP, .indexPIP, .indexDIP, .indexTip,
-            .middleMCP, .middlePIP, .middleDIP, .middleTip, .ringMCP, .ringPIP, .ringDIP, .ringTip,
-            .littleMCP, .littlePIP, .littleDIP, .littleTip
-        ]
-        
-        // Iterare attraverso i nomi dei punti giuntura per ottenere le coordinate x, y e confidence
-        for (index, jointName) in jointNames.enumerated() {
-            if let point = handLandmarks[jointName], point.confidence > 0.3 {
-                // Se la confidenza è maggiore di 0.3, aggiungi le coordinate (x, y) e la confidenza
-                keypointsArray[index * 3] = Float(point.location.x)
-                keypointsArray[index * 3 + 1] = Float(point.location.y)
-                keypointsArray[index * 3 + 2] = Float(point.confidence)
-            } else {
-                // Se non c'è confidenza sufficiente, lascia i valori a zero
-                keypointsArray[index * 3] = 0.0
-                keypointsArray[index * 3 + 1] = 0.0
-                keypointsArray[index * 3 + 2] = 0.0
-            }
-        }
-        
-        // Step 5: Creare il MLMultiArray con forma [1, 3, 21] e inserire i dati estratti
-        guard let multiArray = try? MLMultiArray(shape: [1, 3, 21], dataType: .float32) else {
-            print("Errore nella creazione di MLMultiArray.")
-            return nil
-        }
-        
-        // Inserire i dati nell'MLMultiArray
-        for i in 0..<keypointsArray.count {
-            multiArray[i] = NSNumber(value: keypointsArray[i])
-        }
-        
-        return multiArray
-        
-    } catch {
-        print("Errore nell'estrazione dei punti chiave: \(error.localizedDescription)")
-        return nil
-    }
-}
-
-/// Funzione per convertire `CMSampleBuffer` in `MLMultiArray` per il classificatore di pose
-func extractKeypointsForHandPoseClassifier(from sampleBuffer: CMSampleBuffer) -> MLMultiArray? {
-    // Step 1: Ottenere il `CVPixelBuffer` dal `CMSampleBuffer`
-    guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-        print("Errore nel recupero del CVPixelBuffer dal CMSampleBuffer.")
-        return nil
-    }
-    
-    // Step 2: Chiamare la funzione che estrae i punti chiave dal `CVPixelBuffer`
-    return extractKeypointsForHandPoseClassifier(from: pixelBuffer)
-}
-
-
-// Funzione per ruotare l'immagine di 90 gradi in senso orario
-func rotateUIImage(image: UIImage, clockwise: Bool = true) -> UIImage? {
-    let radians = clockwise ? CGFloat.pi / 2 : -CGFloat.pi / 2
-    var newSize = CGSize(width: image.size.height, height: image.size.width)
-    
-    UIGraphicsBeginImageContextWithOptions(newSize, false, image.scale)
-    guard let context = UIGraphicsGetCurrentContext() else { return nil }
-    
-    // Sposta il contesto al centro
-    context.translateBy(x: newSize.width / 2, y: newSize.height / 2)
-    // Ruota il contesto
-    context.rotate(by: radians)
-    // Disegna l'immagine nel contesto, invertendo la scala (per mantenere l'orientamento)
-    context.scaleBy(x: 1.0, y: -1.0)
-    context.draw(image.cgImage!, in: CGRect(x: -image.size.width / 2, y: -image.size.height / 2, width: image.size.width, height: image.size.height))
-    
-    // Crea una nuova immagine dal contesto
-    let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
-    
-    return rotatedImage
-}
-
-/// Funzione per disegnare i keypoints su una `UIImage` e salvare il risultato.
-func saveImageWithKeypoints(from pixelBuffer: CVPixelBuffer, keypoints: [CGPoint], outputFileName: String = "keypointsImage") {
-    // Convertire il CVPixelBuffer in UIImage
-    guard let image = UIImage(fromPixelBuffer: pixelBuffer) else {
-        print("Errore nella conversione da CVPixelBuffer a UIImage.")
-        return
-    }
-    
-    // Creare un contesto grafico per disegnare sull'immagine
-    UIGraphicsBeginImageContext(image.size)
-    let context = UIGraphicsGetCurrentContext()
-    image.draw(at: CGPoint.zero)
-    
-    // Impostare i parametri di disegno
-    context?.setStrokeColor(UIColor.red.cgColor)
-    context?.setLineWidth(5.0)
-    
-    // Disegnare i keypoints come cerchi sull'immagine
-    for point in keypoints {
-        // Calcolare le coordinate in base alla dimensione dell'immagine
-        let scaledPoint = CGPoint(x: point.x * image.size.width, y: (1 - point.y) * image.size.height)
-        context?.addArc(center: scaledPoint, radius: 5.0, startAngle: 0.0, endAngle: .pi * 2, clockwise: true)
-        context?.fillPath()
-    }
-    
-    // Recuperare l'immagine risultante
-    let imageWithKeypoints = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
-    
-    // Verificare che l'immagine con i keypoints sia stata creata
-    guard let finalImage = imageWithKeypoints else {
-        print("Errore nella creazione dell'immagine finale con i keypoints.")
-        return
-    }
-    
-    // Richiedere l'autorizzazione per salvare nella libreria delle foto
-    PHPhotoLibrary.requestAuthorization { status in
-        switch status {
-        case .authorized:
-            // Salva l'immagine nella libreria delle foto
-            UIImageWriteToSavedPhotosAlbum(finalImage, nil, nil, nil)
-            print("Immagine con keypoints salvata nella galleria delle foto.")
-        case .denied, .restricted:
-            print("Accesso alla libreria delle foto negato o limitato.")
-        case .notDetermined:
-            print("Permesso di accesso alla libreria non determinato.")
-        @unknown default:
-            print("Stato di accesso sconosciuto.")
-        }
-    }
 }
 
 
