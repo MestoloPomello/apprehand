@@ -28,8 +28,8 @@ struct CameraOverlayView: View {
                         }
                         .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
                             if let prediction = notification.object as? String {
-                                handlePrediction(prediction: prediction)
-                                print("Ricevuto prediction da CameraOverlayView", prediction)
+                                handlePrediction(prediction: prediction.lowercased())
+                                print("Ricevuto prediction da CameraView", prediction)
                             }
                         }
                     
@@ -114,16 +114,20 @@ struct CameraOverlayView: View {
     }
     
     func handlePrediction(prediction: String) {
-        //if prediction == letter {
-        if currentLetterIndex % 2 == 0 {
+        print("COV Prediction", prediction)
+        print("Letter", letter)
+        if prediction == letter {
+        //if currentLetterIndex % 2 == 0 {
             isCorrect = true
             rightGuesses += 1
             showResult = true
-        //} else if prediction != "" {
-        } else {
+        } else if prediction != "" {
+        //} else {
             isCorrect = false
             showResult = true
         }
+        print("isCorrect", isCorrect)
+        print("rightGuesses", rightGuesses)
     }
     
     func nextLetter() {
@@ -159,9 +163,6 @@ struct LetterDisplayView: View {
         VStack (alignment: .trailing, spacing: 100) {
             Spacer()
             HStack {
-                
-                // {}
-                
                 Spacer().frame(width: 21)
                 
                 ZStack {
@@ -178,8 +179,8 @@ struct LetterDisplayView: View {
                             .padding()
                             .cornerRadius(15)
                     } else {
-                        //Image("hand_sign_\(letter)")
-                        Image("Esempio")
+                        Image("\(letter.uppercased())")
+                        //Image("Esempio")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 84, height: 84)
