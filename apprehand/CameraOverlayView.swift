@@ -58,10 +58,21 @@ struct CameraOverlayView: View {
                         if showResult {
                             Spacer()
                             VStack(alignment: .center, spacing: 34) {
-                                Image(isCorrect ? "cerchio_giusto_\(viewContext)" : "cerchio_sbagliato_\(viewContext)")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 206, height: 206)
+                                ZStack {
+                                    Image(isCorrect ? "cerchio_giusto_\(viewContext)" : "cerchio_sbagliato_\(viewContext)")
+                                                                        .resizable()
+                                                                        .scaledToFit()
+                                                                        .frame(width: 206, height: 206)
+                                    
+                                    if viewContext == "allenati" {
+                                        Image("\(letter.uppercased())")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 132, height: 132)
+                                            .padding()
+                                    }
+                                }
+                                
                                 //.foregroundColor(isCorrect ? .green : .red)
                                 
                                 if viewContext == "allenati" || isCorrect {

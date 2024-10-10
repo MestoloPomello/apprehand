@@ -38,6 +38,7 @@ struct CameraView: UIViewControllerRepresentable {
         func buildTimer() {
             isCalculating = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                self.isShowingResult = true
                 self.isCalculating = false
                 self.finalizePredictions()
             }
@@ -46,7 +47,7 @@ struct CameraView: UIViewControllerRepresentable {
         func loadModel() {
             do {
                 self.model = try HandPoseClassifier(configuration: MLModelConfiguration())
-                buildTimer()
+                //buildTimer()
             } catch {
                 print("Errore nel caricamento del modello: \(error.localizedDescription)")
             }
@@ -97,9 +98,9 @@ struct CameraView: UIViewControllerRepresentable {
         func handlePrediction(prediction: String) {
             predictions.append(prediction)
             
-            if isCalculating == false {
+            /*if isCalculating == false {
                 self.finalizePredictions()
-            }
+            }*/
         }
         
         // Funzione per elaborare le previsioni e trovare quella più frequente
@@ -124,14 +125,19 @@ struct CameraView: UIViewControllerRepresentable {
             predictions = []
             timer = nil
             startTime = nil
-            isCalculating = true
         }
         
         // Esegue l'inferenza ogni volta che viene catturato un frame
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             
-            if isCalculating == false || isShowingResult == true { return }
+            //print("isShowingResult", isShowingResult)
+            //print("isCalculating", isCalculating)
             
+            if isShowingResult == true { return }
+            if isCalculating == false {
+                buildTimer()
+            }
+                        
             guard let _ = CMSampleBufferGetImageBuffer(sampleBuffer) else {
                 return
             }
@@ -216,6 +222,6 @@ struct CameraView: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         context.coordinator.isShowingResult = showResult
-        context.coordinator.buildTimer()
+        //context.coordinator.buildTimer()
     }
 }
