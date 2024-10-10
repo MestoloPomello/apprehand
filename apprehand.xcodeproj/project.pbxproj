@@ -25,7 +25,6 @@
 		EAC19FAC2C820AFC001F48E1 /* fr.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FAB2C820AFC001F48E1 /* fr.swift */; };
 		EAC19FAE2C820B07001F48E1 /* es.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC19FAD2C820B07001F48E1 /* es.swift */; };
 		EAD09CCD2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = EAD09CCC2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage */; };
-		EAD7D3F82C9091F700A79972 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD7D3F72C9091F700A79972 /* LanguageManager.swift */; };
 		EAEE0D562CA315B300EA51DA /* apprehand_Image_2409.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = EAEE0D552CA315B300EA51DA /* apprehand_Image_2409.mlmodel */; };
 /* End PBXBuildFile section */
 
@@ -69,7 +68,6 @@
 		EAC19FAB2C820AFC001F48E1 /* fr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = fr.swift; sourceTree = "<group>"; };
 		EAC19FAD2C820B07001F48E1 /* es.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = es.swift; sourceTree = "<group>"; };
 		EAD09CCC2CAC3FB9006EBE57 /* HandPoseClassifier.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; name = HandPoseClassifier.mlpackage; path = ../../../../Downloads/HandPoseClassifier.mlpackage; sourceTree = "<group>"; };
-		EAD7D3F72C9091F700A79972 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		EAEE0D552CA315B300EA51DA /* apprehand_Image_2409.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = apprehand_Image_2409.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -125,7 +123,6 @@
 				EAC19FA72C8209D8001F48E1 /* localization */,
 				EA99A4DC2C80BB94004D9CFF /* Models */,
 				EA08E85B2C592BC000004021 /* apprehandApp.swift */,
-				EAD7D3F72C9091F700A79972 /* LanguageManager.swift */,
 				EA08E85D2C592BC000004021 /* ContentView.swift */,
 				EA08E88A2C5931A600004021 /* LevelSelectionView.swift */,
 				EA08E88B2C5931A600004021 /* SharedResources.swift */,
@@ -315,7 +312,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA08E8882C59317200004021 /* CameraOverlayView.swift in Sources */,
-				EAD7D3F82C9091F700A79972 /* LanguageManager.swift in Sources */,
 				EA08E85E2C592BC000004021 /* ContentView.swift in Sources */,
 				EAC19FA82C8209D9001F48E1 /* it.swift in Sources */,
 				EA08E88D2C5931A600004021 /* LevelSelectionView.swift in Sources */,

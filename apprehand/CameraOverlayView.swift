@@ -29,7 +29,6 @@ struct CameraOverlayView: View {
                         .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
                             if let prediction = notification.object as? String {
                                 handlePrediction(prediction: prediction.lowercased())
-                                print("Ricevuto prediction da CameraView", prediction)
                             }
                         }
                     
@@ -115,7 +114,7 @@ struct CameraOverlayView: View {
     
     func handlePrediction(prediction: String) {
         print("COV Prediction", prediction)
-        print("Letter", letter)
+        print("Lettera fare", letter)
         if prediction == letter {
         //if currentLetterIndex % 2 == 0 {
             isCorrect = true

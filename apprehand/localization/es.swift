@@ -1,6 +1,6 @@
 var ES_TRANSLATED_TEXT: [String: String] = [
   "learn": "Aprende",
-  "train": "Entrenamiento",
+  "train": "Tren",
   "italian": "Italiano",
   "english": "Inglés",
   "french": "Francés",

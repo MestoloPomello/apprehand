@@ -35,15 +35,18 @@ struct CameraView: UIViewControllerRepresentable {
             self.loadModel()
         }
         
+        func buildTimer() {
+            isCalculating = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                self.isCalculating = false
+                self.finalizePredictions()
+            }
+        }
+        
         func loadModel() {
             do {
                 self.model = try HandPoseClassifier(configuration: MLModelConfiguration())
-                
-                isCalculating = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
-                    self.isCalculating = false
-                    self.finalizePredictions()
-                }
+                buildTimer()
             } catch {
                 print("Errore nel caricamento del modello: \(error.localizedDescription)")
             }
@@ -121,14 +124,17 @@ struct CameraView: UIViewControllerRepresentable {
             predictions = []
             timer = nil
             startTime = nil
+            isCalculating = true
         }
         
         // Esegue l'inferenza ogni volta che viene catturato un frame
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             
-            if isCalculating == false { return }
+            if isCalculating == false || isShowingResult == true { return }
             
-            guard let _ = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+            guard let _ = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                return
+            }
             
             let prediction = classifyImage(buffer: sampleBuffer)
             if !prediction.isEmpty {
@@ -210,5 +216,6 @@ struct CameraView: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         context.coordinator.isShowingResult = showResult
+        context.coordinator.buildTimer()
     }
 }
