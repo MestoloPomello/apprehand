@@ -21,7 +21,7 @@ struct CameraOverlayView: View {
         NavigationStack(path: $navigationPath.path) {
             //HStack (alignment: .center) {
                 ZStack {
-                    CameraView(showResult: $showResult)
+                    CameraView(showResult: $showResult, lvNumber: lvNumber, letter: $letter)
                     //.edgesIgnoringSafeArea(.all)
                         .onAppear {
                             letter = letters[currentLetterIndex]
@@ -149,14 +149,15 @@ struct CameraOverlayView: View {
             if viewContext == "allenati" {
                 // Calcola il punteggio finale e naviga alla ResultsView
                 let score = Double(rightGuesses) / Double(lettersLevels[lvNumber]!.count) * 100
-                
-                if rightGuesses == lettersLevels[lvNumber]!.count {
-                    UserDefaults.standard.set(lvNumber, forKey: "progress_\(viewContext)")
-                }
-                
                 navigateToView(rootView: ResultsView(score: score))
             } else {
                 navigateToView(rootView: LevelSelectionView(viewContext: viewContext, navigationPath: navigationPath))
+            }
+            
+            if rightGuesses == lettersLevels[lvNumber]!.count {
+                if lvNumber > UserDefaults.standard.integer(forKey: "progress_\(viewContext)") {
+                    UserDefaults.standard.set(lvNumber, forKey: "progress_\(viewContext)")
+                }
             }
         }
     }

@@ -9,6 +9,8 @@ import UIKit
 struct CameraView: UIViewControllerRepresentable {
     
     @Binding var showResult: Bool
+    var lvNumber: Int
+    @Binding var letter: String
     
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         var isShowingResult: Bool = false
@@ -107,18 +109,36 @@ struct CameraView: UIViewControllerRepresentable {
         func finalizePredictions() {
             guard !predictions.isEmpty else { return }
             
-            print("Predictions", predictions)
+            var groupPredictions: [String] = []
+            predictions.forEach { prediction in
+                let isContains = lettersLevels[self.parent.lvNumber]?.contains(prediction.lowercased()) ?? false
+                
+                if isContains {
+                    groupPredictions.append(prediction)
+                }
+            }
             
-            // Trova la previsione più frequente nell'array
-            let mostFrequentPrediction = predictions
-                .reduce(into: [:]) { counts, prediction in counts[prediction, default: 0] += 1 }
-                .max { $0.1 < $1.1 }?.0 ?? ""
+            print("GroupPrediction", groupPredictions)
             
-            print("MostFrequentPrediction", mostFrequentPrediction)
+            var finalPrediction: String = ""
+            
+            if groupPredictions.isEmpty && !predictions.isEmpty {
+                finalPrediction = predictions[0]
+            } else if !groupPredictions.isEmpty {
+                /*finalPrediction = groupPredictions
+                    .reduce(into: [:]) { counts, prediction in counts[prediction, default: 0] += 1 }
+                    .max { $0.1 < $1.1 }?.0 ?? ""*/
+                let isContains = groupPredictions.contains(self.parent.letter.uppercased())
+                if isContains {
+                    finalPrediction = self.parent.letter.uppercased()
+                } else {
+                    finalPrediction = groupPredictions[0]
+                }
+            }
             
             // Invia la previsione finale tramite una notifica o un callback
             DispatchQueue.main.async {
-                NotificationCenter.default.post(name: .predictionDidUpdate, object: mostFrequentPrediction)
+                NotificationCenter.default.post(name: .predictionDidUpdate, object: finalPrediction)
             }
             
             // Resetta le variabili
