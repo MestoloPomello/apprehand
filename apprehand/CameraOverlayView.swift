@@ -12,6 +12,7 @@ struct CameraOverlayView: View {
     @State private var prediction: String = ""
     @State private var rightGuesses: Int = 0
     @State private var imgSrc: String = ""
+    @State private var cameraViewId = UUID()
     
     var lvNumber: Int
     var viewContext: String
@@ -23,6 +24,7 @@ struct CameraOverlayView: View {
                 ZStack {
                     CameraView(showResult: $showResult, lvNumber: lvNumber, letter: $letter)
                     //.edgesIgnoringSafeArea(.all)
+                        .id(cameraViewId)
                         .onAppear {
                             letter = letters[currentLetterIndex]
                         }
@@ -142,6 +144,7 @@ struct CameraOverlayView: View {
     
     func nextLetter() {
         showResult = false
+        cameraViewId = UUID()
         if currentLetterIndex + 1 < lettersLevels[lvNumber]!.count {
             currentLetterIndex += 1
             letter = lettersLevels[lvNumber]![currentLetterIndex]
