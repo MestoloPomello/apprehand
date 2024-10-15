@@ -12,7 +12,6 @@ struct CameraOverlayView: View {
     @State private var prediction: String = ""
     @State private var rightGuesses: Int = 0
     @State private var imgSrc: String = ""
-    @State private var cameraViewId = UUID()
     
     var lvNumber: Int
     var viewContext: String
@@ -24,9 +23,11 @@ struct CameraOverlayView: View {
                 ZStack {
                     CameraView(showResult: $showResult, lvNumber: lvNumber, letter: $letter)
                     //.edgesIgnoringSafeArea(.all)
-                        .id(cameraViewId)
                         .onAppear {
                             letter = letters[currentLetterIndex]
+                        }
+                        .onDisappear() {
+                            print("NavigationPath", navigationPath.path)
                         }
                         .onReceive(NotificationCenter.default.publisher(for: .predictionDidUpdate)) { notification in
                             if let prediction = notification.object as? String {
@@ -140,15 +141,16 @@ struct CameraOverlayView: View {
         }
         print("isCorrect", isCorrect)
         print("rightGuesses", rightGuesses)
+        print("------")
     }
     
     func nextLetter() {
-        showResult = false
-        cameraViewId = UUID()
         if currentLetterIndex + 1 < lettersLevels[lvNumber]!.count {
+            showResult = false
             currentLetterIndex += 1
             letter = lettersLevels[lvNumber]![currentLetterIndex]
         } else {
+            showResult = true
             if viewContext == "allenati" {
                 // Calcola il punteggio finale e naviga alla ResultsView
                 let score = Double(rightGuesses) / Double(lettersLevels[lvNumber]!.count) * 100

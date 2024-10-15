@@ -13,7 +13,7 @@ struct ContentView: View {
         NavigationStack(path: $navigationPath.path) {
             ZStack {
                 // Immagine di sfondo
-                Image("background")
+                Image("bg_upscale")
                     .resizable()
                     .scaledToFill()
                     .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)

@@ -13,14 +13,11 @@ struct CameraView: UIViewControllerRepresentable {
     @Binding var letter: String
     
     class Coordinator: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-        var isShowingResult: Bool = false
         var parent: CameraView
         var model: HandPoseClassifier?
         var request: VNCoreMLRequest?
         
-        var predictions: [String] = []  // Array per salvare le previsioni durante i 3 secondi
-        var timer: Timer? = nil         // Timer per gestire i 3 secondi
-        var startTime: Date? = nil      // Data di inizio del rilevamento
+        var predictions: [String] = []
         var isCalculating: Bool = false
         
         weak private var previewView: UIView!
@@ -38,18 +35,18 @@ struct CameraView: UIViewControllerRepresentable {
         }
         
         func buildTimer() {
-            isCalculating = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
-                self.isShowingResult = true
-                self.isCalculating = false
-                self.finalizePredictions()
+            if !self.parent.showResult {
+                isCalculating = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                    self.isCalculating = false
+                    self.finalizePredictions()
+                }
             }
         }
         
         func loadModel() {
             do {
                 self.model = try HandPoseClassifier(configuration: MLModelConfiguration())
-                //buildTimer()
             } catch {
                 print("Errore nel caricamento del modello: \(error.localizedDescription)")
             }
@@ -99,10 +96,6 @@ struct CameraView: UIViewControllerRepresentable {
         
         func handlePrediction(prediction: String) {
             predictions.append(prediction)
-            
-            /*if isCalculating == false {
-                self.finalizePredictions()
-            }*/
         }
         
         // Funzione per elaborare le previsioni e trovare quella più frequente
@@ -143,17 +136,12 @@ struct CameraView: UIViewControllerRepresentable {
             
             // Resetta le variabili
             predictions = []
-            timer = nil
-            startTime = nil
         }
         
         // Esegue l'inferenza ogni volta che viene catturato un frame
         func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
             
-            //print("isShowingResult", isShowingResult)
-            //print("isCalculating", isCalculating)
-            
-            if isShowingResult == true { return }
+            if self.parent.showResult == true { return }
             if isCalculating == false {
                 buildTimer()
             }
@@ -172,15 +160,15 @@ struct CameraView: UIViewControllerRepresentable {
             let devicePosition = UIDevice.current.orientation
             switch devicePosition {
             case .portrait:
-                return .right // L'immagine è ruotata di 90° in senso antiorario
+                return .right
             case .landscapeLeft:
-                return .down // Rotata di 180°
+                return .down
             case .landscapeRight:
-                return .up // Orientamento corretto
+                return .up
             case .portraitUpsideDown:
-                return .left // Rotata di 270°
+                return .left
             default:
-                return .right // Default: ruotata di 90°
+                return .right
             }
         }
         
@@ -241,7 +229,7 @@ struct CameraView: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        context.coordinator.isShowingResult = showResult
+        //context.coordinator.isShowingResult = showResult
         //context.coordinator.buildTimer()
     }
 }
