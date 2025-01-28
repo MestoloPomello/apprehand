@@ -134,7 +134,6 @@ struct CameraView: UIViewControllerRepresentable {
                 NotificationCenter.default.post(name: .predictionDidUpdate, object: finalPrediction)
             }
             
-            // Resetta le variabili
             predictions = []
         }
         

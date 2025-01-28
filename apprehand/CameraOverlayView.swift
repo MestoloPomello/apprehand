@@ -235,8 +235,6 @@ struct LetterDisplayView: View {
 }
 
 
-
-// Estensione per le notifiche
 extension Notification.Name {
     static let predictionDidUpdate = Notification.Name("predictionDidUpdate")
 }

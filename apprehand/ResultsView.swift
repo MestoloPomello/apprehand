@@ -61,8 +61,8 @@ struct ResultsView: View {
                     Text("Menu")
                         .font(.system(size: 25))
                         .fontWeight(.bold)
-                        .padding() // Spazio interno del bottone
-                        .frame(width: 182, height: 88) // Dimensione del bottone
+                        .padding()
+                        .frame(width: 182, height: 88)
                         //.background(LinearGradient(gradient: Gradient(colors: gradientData.colori), startPoint: .top, endPoint: .bottom))
                         .background(LinearGradient(gradient: Gradient(colors: gradientsForContext["allenati"]?.colori ?? [Color.white, Color.gray]), startPoint: .top, endPoint: .bottom))
                         .shadow(
